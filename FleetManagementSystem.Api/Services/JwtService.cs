@@ -53,12 +53,17 @@ public class JwtService : IJwtService
 
     public string ExtractUserName(string token)
     {
-        var principal = GetPrincipalFromToken(token);
-        return principal?.Identity?.Name; // Mapped to Name claim? No, usually SUB or unique_name
-        // Use manual extraction if needed
-        var handler = new JwtSecurityTokenHandler();
-        var jwtToken = handler.ReadJwtToken(token);
-        return jwtToken.Subject;
+        try
+        {
+            var handler = new JwtSecurityTokenHandler();
+            var jwtToken = handler.ReadJwtToken(token);
+            // Subject (sub) is where we store the username in GenerateToken
+            return jwtToken.Subject;
+        }
+        catch (Exception)
+        {
+            return null;
+        }
     }
 
     public bool ValidateToken(string token, string username)

@@ -55,6 +55,50 @@ public class CustomerService : ICustomerService
     
     public CustomerMaster AddCustomer(CustomerMaster customer)
     {
+        // Check if customer exists by Email to prevent duplicates
+        var existingCustomer = _context.Customers.FirstOrDefault(c => c.Email == customer.Email);
+        if (existingCustomer != null)
+        {
+             // Update existing customer fields
+             existingCustomer.FirstName = customer.FirstName;
+             existingCustomer.LastName = customer.LastName;
+             existingCustomer.MobileNumber = customer.MobileNumber;
+             existingCustomer.AddressLine1 = customer.AddressLine1;
+             
+             // Handle nullable/optional updates
+             if (!string.IsNullOrEmpty(customer.AddressLine2)) existingCustomer.AddressLine2 = customer.AddressLine2;
+             if (!string.IsNullOrEmpty(customer.City)) existingCustomer.City = customer.City;
+             if (!string.IsNullOrEmpty(customer.Pincode)) existingCustomer.Pincode = customer.Pincode;
+             // Ensure PhoneNumber is set
+             existingCustomer.PhoneNumber = !string.IsNullOrEmpty(customer.PhoneNumber) 
+                                            ? customer.PhoneNumber 
+                                            : (!string.IsNullOrEmpty(customer.MobileNumber) ? customer.MobileNumber : existingCustomer.PhoneNumber);
+
+             if (!string.IsNullOrEmpty(customer.DrivingLicenseNumber)) existingCustomer.DrivingLicenseNumber = customer.DrivingLicenseNumber;
+             // ... map other fields as needed or just save
+             
+             _context.SaveChanges();
+             return existingCustomer;
+        }
+
+        // New Customer Logic
+        customer.AddressLine2 ??= "";
+        customer.City ??= "";
+        customer.Pincode ??= "";
+        
+        // Fix for NOT NULL constraint on PhoneNumber
+        if (string.IsNullOrEmpty(customer.PhoneNumber))
+        {
+            customer.PhoneNumber = customer.MobileNumber;
+        }
+
+        // Leave MembershipId null to avoid UNIQUE constraint violation on empty strings
+        // customer.MembershipId ??= ""; 
+
+        customer.IdpNumber ??= "";
+        customer.PassportNumber ??= "";
+        customer.PassportIssuedBy ??= "";
+        
         _context.Customers.Add(customer);
         _context.SaveChanges();
         return customer;

@@ -28,6 +28,20 @@ public class HubService : IHubService
     public List<HubMaster> GetAllHubs() => _context.Hubs.Include(h => h.City).Include(h => h.City.State).ToList();
     public List<HubMaster> GetHubsByCityId(int cityId) => _context.Hubs.Where(h => h.CityId == cityId).Include(h => h.City).Include(h => h.City.State).ToList();
     public HubMaster GetHubById(int hubId) => _context.Hubs.Include(h => h.City).Include(h => h.City.State).FirstOrDefault(h => h.HubId == hubId);
+    
+    public List<HubMaster> SearchHubsByAirportCode(string airportCode)
+    {
+        var hubIds = _context.Airports
+            .Where(a => a.AirportCode == airportCode && a.HubId != null)
+            .Select(a => a.HubId)
+            .ToList();
+
+        return _context.Hubs
+            .Where(h => hubIds.Contains(h.HubId))
+            .Include(h => h.City)
+            .Include(h => h.City.State)
+            .ToList();
+    }
 }
 
 public class AirportService : IAirportService

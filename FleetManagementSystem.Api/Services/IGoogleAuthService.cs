@@ -1,8 +1,9 @@
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace FleetManagementSystem.Api.Services;
 
 public interface IGoogleAuthService
 {
-    Task<string> VerifyGoogleTokenAndGetJwtAsync(string accessToken);
+    Task<Dictionary<string, object>> VerifyGoogleTokenAndGetJwtAsync(string accessToken);
 }

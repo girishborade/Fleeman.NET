@@ -45,8 +45,8 @@ public class InvoiceHeaderTable
     public double TotalAmt { get; set; }
 
     [Column("customer_details")]
-    public string CustomerDetails { get; set; }
+    public string? CustomerDetails { get; set; }
 
     [Column("rate")]
-    public string Rate { get; set; }
+    public string? Rate { get; set; }
 }

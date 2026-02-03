@@ -47,7 +47,7 @@ const ApiService = {
 
     // Bookings
     createBooking: (bookingRequest) => instance.post('/booking/create', bookingRequest).then(res => res.data),
-    getBooking: (id) => instance.get(`/booking/${id}`).then(res => res.data),
+    getBooking: (id) => instance.get(`/booking/get/${id}`).then(res => res.data),
     getBookingsByUser: (email) => instance.get(`/booking/user/${email}`).then(res => res.data),
     processHandover: (request) => instance.post('/booking/process-handover', request).then(res => res.data),
     returnCar: (request) => instance.post('/booking/return', request).then(res => res.data),

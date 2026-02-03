@@ -12,7 +12,7 @@ public class CustomerMaster
     public int CustId { get; set; }
 
     [Column("membership_id")]
-    public string MembershipId { get; set; }
+    public string? MembershipId { get; set; }
 
     [Column("first_name")] // Mapping logic inferred from Java field name standard
     public string FirstName { get; set; }
@@ -24,19 +24,19 @@ public class CustomerMaster
     public string AddressLine1 { get; set; }
 
     [Column("address_line2")]
-    public string AddressLine2 { get; set; }
+    public string? AddressLine2 { get; set; }
 
     [Column("email")]
     public string Email { get; set; }
 
     [Column("city")]
-    public string City { get; set; }
+    public string? City { get; set; }
 
     [Column("pincode")]
-    public string Pincode { get; set; }
+    public string? Pincode { get; set; }
 
     [Column("phone_number")]
-    public string PhoneNumber { get; set; }
+    public string? PhoneNumber { get; set; }
 
     [Column("mobile_number")]
     public string MobileNumber { get; set; }
@@ -51,22 +51,22 @@ public class CustomerMaster
     public string DrivingLicenseNumber { get; set; }
 
     [Column("idp_number")]
-    public string IdpNumber { get; set; }
+    public string? IdpNumber { get; set; }
 
-    [Column("issued_by_dl")]
+    [Column("issued_bydl")]
     public string IssuedByDL { get; set; }
 
-    [Column("valid_through_dl")]
+    [Column("valid_throughdl")]
     public DateTime? ValidThroughDL { get; set; }
 
     [Column("passport_number")]
-    public string PassportNumber { get; set; }
+    public string? PassportNumber { get; set; }
 
     [Column("passport_valid_through")]
     public DateTime? PassportValidThrough { get; set; }
 
     [Column("passport_issued_by")]
-    public string PassportIssuedBy { get; set; }
+    public string? PassportIssuedBy { get; set; }
 
     [Column("passport_valid_from")]
     public DateTime? PassportValidFrom { get; set; }

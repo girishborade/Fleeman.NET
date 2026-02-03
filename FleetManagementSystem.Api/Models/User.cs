@@ -12,16 +12,16 @@ public class User
     public int Id { get; set; }
 
     [Column("username")]
-    public string Username { get; set; }
+    public string? Username { get; set; }
 
     [Column("password")]
-    public string Password { get; set; }
+    public string? Password { get; set; }
 
     [Column("email")]
-    public string Email { get; set; }
+    public string? Email { get; set; }
 
     [Column("role")]
-    public string Role { get; set; } // Storing enum as string. Ideally use Enum datatype with conversion.
+    public string? Role { get; set; } // Storing enum as string. Ideally use Enum datatype with conversion.
 
     [ForeignKey("Hub")]
     [Column("hub_id")]
@@ -29,11 +29,11 @@ public class User
     public HubMaster Hub { get; set; }
 
     [Column("reset_token")]
-    public string ResetToken { get; set; }
+    public string? ResetToken { get; set; }
 
     [Column("reset_token_expiry")]
     public DateTime? ResetTokenExpiry { get; set; }
 
-    [Column("is_approved")]
-    public string IsApproved { get; set; }
+    [NotMapped]
+    public string? IsApproved { get; set; }
 }

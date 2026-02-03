@@ -16,18 +16,10 @@ public class BookingController : ControllerBase
         _bookingService = bookingService;
     }
 
-    [HttpGet("{bookingId}")]
-    public ActionResult<BookingResponse> GetBooking(long bookingId)
-    {
-        try
-        {
-            return Ok(_bookingService.GetBooking(bookingId));
-        }
-        catch (Exception ex)
-        {
-            return NotFound(ex.Message);
-        }
-    }
+    // Moved GetBooking to the bottom to avoid potential route conflicts with literal paths like "return", "all", etc.
+
+    [HttpGet("heartbeat")]
+    public IActionResult Heartbeat() => Ok("Booking Controller is Running - Version 3 (Get Fix)");
 
     [HttpGet("user/{email}")]
     public ActionResult<List<BookingResponse>> GetBookingsByUser(string email)
@@ -54,12 +46,12 @@ public class BookingController : ControllerBase
         }
     }
 
-    [HttpPost("handover/{bookingId}")]
-    public ActionResult<BookingResponse> HandoverCar(long bookingId)
+    [HttpPost("handover/{id}")]
+    public ActionResult<BookingResponse> HandoverCar([FromRoute] long id)
     {
         // Delegating to ProcessHandover wrapper logic if needed, but ProcessHandover(HandoverRequest) is main 
         // Java code: handoverCar(Long) -> calls processHandover(new HandoverRequest(id))
-        var req = new HandoverRequest { BookingId = bookingId };
+        var req = new HandoverRequest { BookingId = id };
         try
         {
             return Ok(_bookingService.ProcessHandover(req));
@@ -96,12 +88,12 @@ public class BookingController : ControllerBase
         }
     }
 
-    [HttpPost("cancel/{bookingId}")]
-    public ActionResult<BookingResponse> CancelBooking(long bookingId)
+    [HttpPost("cancel/{id}")]
+    public ActionResult<BookingResponse> CancelBooking([FromRoute] long id)
     {
         try
         {
-            return Ok(_bookingService.CancelBooking(bookingId));
+            return Ok(_bookingService.CancelBooking(id));
         }
         catch (Exception ex)
         {
@@ -109,12 +101,12 @@ public class BookingController : ControllerBase
         }
     }
 
-    [HttpPut("modify/{bookingId}")]
-    public ActionResult<BookingResponse> ModifyBooking(long bookingId, [FromBody] BookingRequest request)
+    [HttpPut("modify/{id}")]
+    public ActionResult<BookingResponse> ModifyBooking([FromRoute] long id, [FromBody] BookingRequest request)
     {
         try
         {
-             return Ok(_bookingService.ModifyBooking(bookingId, request));
+             return Ok(_bookingService.ModifyBooking(id, request));
         }
         catch (Exception ex)
         {
@@ -128,5 +120,20 @@ public class BookingController : ControllerBase
         // Stub as in Java
         // initialDateService.storeTempDateandTime(...)
         return Ok("success");
+    }
+
+    [HttpGet("get/{id}")]
+    public ActionResult<BookingResponse> GetBooking([FromRoute] string id)
+    {
+        try
+        {
+            var response = _bookingService.GetBooking(id);
+            return Ok(response);
+        }
+        catch (Exception ex)
+        {
+            // Consistent error reporting
+            return NotFound(ex.Message);
+        }
     }
 }

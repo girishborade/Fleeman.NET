@@ -9,57 +9,14 @@ namespace FleetManagementSystem.Api.Controllers;
 [Route("api/v1")]
 public class LocationController : ControllerBase
 {
-    private readonly IStateService _stateService;
-    private readonly ICityService _cityService;
     private readonly IHubService _hubService;
-    private readonly IAirportService _airportService;
+    public LocationController(IHubService hubService) => _hubService = hubService;
 
-    public LocationController(IStateService stateService, ICityService cityService, IHubService hubService, IAirportService airportService)
+    [HttpGet("locations/search")]
+    public ActionResult<List<HubMaster>> SearchLocations([FromQuery] string query)
     {
-        _stateService = stateService;
-        _cityService = cityService;
-        _hubService = hubService;
-        _airportService = airportService;
+        return Ok(_hubService.SearchHubsByAirportCode(query));
     }
-
-    // State Endpoints
-    [HttpGet("states")]
-    public ActionResult<List<StateMaster>> GetAllStates()
-    {
-        return Ok(_stateService.GetAllStates());
-    }
-
-    // City Endpoints
-    [HttpGet("cities")]
-    public ActionResult<List<CityMaster>> GetAllCities()
-    {
-        return Ok(_cityService.GetAllCities());
-    }
-
-    [HttpGet("cities/{stateId}")]
-    public ActionResult<List<CityMaster>> GetCitiesByStateId(int stateId)
-    {
-        return Ok(_cityService.GetCitiesByStateId(stateId));
-    }
-
-    // Hub Endpoints
-    [HttpGet("hubs")]
-    public ActionResult<List<HubMaster>> GetAllHubs()
-    {
-        return Ok(_hubService.GetAllHubs());
-    }
-
-    [HttpGet("hubs/{cityId}")] // Verify route
-    public ActionResult<List<HubMaster>> GetHubsByCityId(int cityId)
-    {
-        return Ok(_hubService.GetHubsByCityId(cityId));
-    }
-    
-    // Check if separate HubController is needed or combined logic is fine.
-    // Java usually has separate controllers.
-    // I am combining here for brevity but will split if needed.
-    // Actually, let's stick to separate controllers to match "Port Controllers" strictly.
-    // I will refactor below to separate classes.
 }
 
 [ApiController]

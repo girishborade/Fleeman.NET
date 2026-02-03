@@ -48,17 +48,19 @@ public class CarService : ICarService
         // Logic: Find cars at the hub that are NOT overlapping with confirmed/active bookings in the date range.
         
         var bookedCarIds = _context.Bookings
-            .Where(b => b.PickupHub.HubId == hubId &&
+            .Where(b => b.PickupHubId == hubId &&
                         (b.BookingStatus == "CONFIRMED" || b.BookingStatus == "ACTIVE") &&
                         ((b.StartDate <= endDate && b.EndDate >= startDate))) // Overlap check
-            .Select(b => b.Car.CarId)
+            .Select(b => b.CarId)
+            .Where(id => id.HasValue)
+            .Select(id => id.Value)
             .Distinct();
 
         var query = _context.Cars
             .Include(c => c.CarType)
             .AsQueryable();
 
-        query = query.Where(c => c.HubId == hubId && c.IsAvailable == AvailabilityStatus.Y);
+        query = query.Where(c => c.HubId == hubId && (c.IsAvailable == "Y" || c.IsAvailable == "YES"));
 
         if (carTypeId.HasValue)
         {

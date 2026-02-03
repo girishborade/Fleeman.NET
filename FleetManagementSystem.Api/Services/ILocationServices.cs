@@ -19,6 +19,7 @@ public interface IHubService
     List<HubMaster> GetAllHubs();
     List<HubMaster> GetHubsByCityId(int cityId);
     HubMaster GetHubById(int hubId);
+    List<HubMaster> SearchHubsByAirportCode(string airportCode);
 }
 
 public interface IAirportService

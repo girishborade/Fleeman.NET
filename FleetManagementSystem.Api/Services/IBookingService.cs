@@ -8,7 +8,7 @@ public interface IBookingService
     BookingResponse CreateBooking(BookingRequest request);
     BookingResponse ProcessHandover(HandoverRequest request);
     BookingResponse ReturnCar(ReturnRequest request);
-    BookingResponse GetBooking(long bookingId);
+    BookingResponse GetBooking(string bookingId);
     List<BookingResponse> GetBookingsByEmail(string email);
     List<BookingResponse> GetAllBookings();
     BookingResponse CancelBooking(long bookingId);

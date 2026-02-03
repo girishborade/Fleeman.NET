@@ -15,10 +15,10 @@ public class BookingHeaderTable
     public DateTime? BookingDate { get; set; }
 
     [Column("confirmation_number")]
-    public string ConfirmationNumber { get; set; }
+    public string? ConfirmationNumber { get; set; }
 
     [Column("booking_status")]
-    public string BookingStatus { get; set; }
+    public string? BookingStatus { get; set; }
 
     [ForeignKey("Customer")]
     [Column("cust_id")]
@@ -52,19 +52,19 @@ public class BookingHeaderTable
     public CarMaster Car { get; set; }
 
     [Column("first_name")]
-    public string FirstName { get; set; }
+    public string? FirstName { get; set; }
 
     [Column("last_name")]
-    public string LastName { get; set; }
+    public string? LastName { get; set; }
 
     [Column("address")]
-    public string Address { get; set; }
+    public string? Address { get; set; }
 
     [Column("state")]
-    public string State { get; set; }
+    public string? State { get; set; }
 
     [Column("pin")]
-    public string Pin { get; set; }
+    public string? Pin { get; set; }
 
     [Column("daily_rate")]
     public double? DailyRate { get; set; }
@@ -75,27 +75,27 @@ public class BookingHeaderTable
     [Column("monthly_rate")]
     public double? MonthlyRate { get; set; }
 
-    [Column("Email_ID")]
-    public string EmailId { get; set; }
+    [Column("email_id")]
+    public string? EmailId { get; set; }
 
-    [Column("BookCar")]
-    public string Bookcar { get; set; }
+    [Column("book_car")]
+    public string? Bookcar { get; set; }
 
     [Column("pickup_time")]
     public DateTime? PickupTime { get; set; }
 
     [Column("pickup_fuel_status")]
-    public string PickupFuelStatus { get; set; }
+    public string? PickupFuelStatus { get; set; }
 
     [Column("pickup_condition")]
-    public string PickupCondition { get; set; }
+    public string? PickupCondition { get; set; }
 
     [Column("return_time")]
     public DateTime? ReturnTime { get; set; }
 
     [Column("return_fuel_status")]
-    public string ReturnFuelStatus { get; set; }
+    public string? ReturnFuelStatus { get; set; }
 
     [Column("return_condition")]
-    public string ReturnCondition { get; set; }
+    public string? ReturnCondition { get; set; }
 }

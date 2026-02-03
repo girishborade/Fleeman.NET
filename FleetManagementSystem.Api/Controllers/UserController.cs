@@ -39,7 +39,7 @@ public class UserController : ControllerBase
         var createdUser = _userService.AddUser(user);
         if (createdUser == null)
         {
-            return BadRequest("User creation failed.");
+            return BadRequest("User creation failed. Username or Email might already exist.");
         }
         return Created("", createdUser); 
     }
@@ -99,25 +99,8 @@ public class UserController : ControllerBase
         {
             if (request.TryGetValue("token", out var token))
             {
-                var jwt = await _googleAuthService.VerifyGoogleTokenAndGetJwtAsync(token);
-                var username = _jwtService.ExtractUserName(jwt);
-                var fullUser = _userService.GetUserByUsername(username);
-
-                var response = new Dictionary<string, object>
-                 {
-                     { "token", jwt },
-                     { "role", fullUser.Role },
-                     { "userId", fullUser.Id },
-                     { "email", fullUser.Email },
-                     { "username", fullUser.Username }
-                 };
-
-                 if (fullUser.HubId.HasValue)
-                 {
-                     response["hubId"] = fullUser.HubId;
-                 }
-
-                 return Ok(response);
+                var authResponse = await _googleAuthService.VerifyGoogleTokenAndGetJwtAsync(token);
+                return Ok(authResponse);
             }
              return Unauthorized("Invalid Google Token");
         }

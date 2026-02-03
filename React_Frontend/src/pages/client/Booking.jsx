@@ -19,6 +19,7 @@ import {
     CheckCircle2,
     Loader2
 } from "lucide-react";
+import { formatDateForInput } from "@/lib/utils";
 
 const Booking = () => {
     const navigate = useNavigate();
@@ -76,6 +77,7 @@ const Booking = () => {
         dateOfBirth: '',
         addressLine1: '',
         city: '',
+        pincode: '',
         drivingLicenseNumber: '',
         issuedByDL: '',
         validThroughDL: '',
@@ -182,7 +184,15 @@ const Booking = () => {
                     setLoading(true);
                     const data = await ApiService.findCustomer(userEmail);
                     if (data) {
-                        setCustomer(prev => ({ ...prev, ...data }));
+                        setCustomer(prev => ({
+                            ...prev,
+                            ...data,
+                            dateOfBirth: formatDateForInput(data.dateOfBirth),
+                            validThroughDL: formatDateForInput(data.validThroughDL),
+                            passportIssueDate: formatDateForInput(data.passportIssueDate),
+                            passportValidThrough: formatDateForInput(data.passportValidThrough),
+                            passportValidFrom: formatDateForInput(data.passportValidFrom)
+                        }));
                         console.log('Member data auto-filled for:', userEmail);
                     }
                 } catch (err) {
@@ -195,6 +205,12 @@ const Booking = () => {
 
         prefillData();
     }, [currentUser]);
+
+    useEffect(() => {
+        if (step === 3 && selectedCity && !customer.city) {
+            setCustomer(prev => ({ ...prev, city: selectedCity.name }));
+        }
+    }, [step, selectedCity]);
 
     const loadStates = async () => {
         try {
@@ -342,16 +358,42 @@ const Booking = () => {
         }
         try {
             setLoading(true);
-            const response = await ApiService.saveCustomer(customer);
-            if (response.success && response.data) {
-                setCustomer(prev => ({ ...prev, ...response.data })); // Update with ID
-                setStep(4);
-            } else {
-                alert('Failed to save customer info.');
-            }
+
+            // Clean up the customer object - convert empty strings to null for date fields
+            const cleanedCustomer = {
+                ...customer,
+                city: customer.city || null,
+                pincode: customer.pincode || null,
+                passportNumber: customer.passportNumber || null,
+                passportIssuedBy: customer.passportIssuedBy || null,
+                dateOfBirth: customer.dateOfBirth || null,
+                validThroughDL: customer.validThroughDL || null,
+                passportIssueDate: customer.passportIssueDate || null,
+                passportValidThrough: customer.passportValidThrough || null,
+                passportValidFrom: customer.passportValidFrom || null
+            };
+
+            const response = await ApiService.saveCustomer(cleanedCustomer);
+            // Backend returns the customer object directly
+            setCustomer(prev => ({
+                ...prev,
+                ...response,
+                dateOfBirth: formatDateForInput(response.dateOfBirth),
+                validThroughDL: formatDateForInput(response.validThroughDL),
+                passportIssueDate: formatDateForInput(response.passportIssueDate),
+                passportValidThrough: formatDateForInput(response.passportValidThrough),
+                passportValidFrom: formatDateForInput(response.passportValidFrom)
+            })); // Update with ID
+            setStep(4);
         } catch (err) {
             console.error(err);
             alert('Error saving customer info: ' + (err.response?.data?.message || err.message));
+            if (err.response && err.response.data && err.response.data.errors) {
+                console.error("Validation Errors:", err.response.data.errors);
+                const errorMsg = Object.entries(err.response.data.errors).map(([key, val]) => `${key}: ${val.join(', ')}`).join('\n');
+                alert("Validation Failed:\n" + errorMsg);
+            }
+
         } finally {
             setLoading(false);
         }
@@ -767,6 +809,27 @@ const Booking = () => {
                                             className={`h-12 ${errors.addressLine1 ? 'border-destructive' : ''}`}
                                         />
                                         {errors.addressLine1 && <p className="text-xs text-destructive">{errors.addressLine1}</p>}
+                                    </div>
+
+                                    <div className="grid md:grid-cols-2 gap-6">
+                                        <div className="space-y-2">
+                                            <Label htmlFor="city" className="text-sm font-bold text-muted-foreground uppercase tracking-widest">City</Label>
+                                            <Input
+                                                id="city"
+                                                value={customer.city || ''}
+                                                onChange={e => setCustomer(prev => ({ ...prev, city: e.target.value }))}
+                                                className="h-12"
+                                            />
+                                        </div>
+                                        <div className="space-y-2">
+                                            <Label htmlFor="pincode" className="text-sm font-bold text-muted-foreground uppercase tracking-widest">Pincode</Label>
+                                            <Input
+                                                id="pincode"
+                                                value={customer.pincode || ''}
+                                                onChange={e => setCustomer(prev => ({ ...prev, pincode: e.target.value }))}
+                                                className="h-12"
+                                            />
+                                        </div>
                                     </div>
 
                                     <div className="pt-6 border-t">

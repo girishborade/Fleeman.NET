@@ -72,7 +72,7 @@ const StaffDashboard = () => {
 
             setShowModal(true);
         } catch (err) {
-            setMessage({ type: 'danger', text: 'Booking not found or error fetching details.' });
+            setMessage({ type: 'danger', text: err.response?.data || 'Booking not found or error fetching details.' });
         } finally {
             setLoading(false);
         }
@@ -115,7 +115,7 @@ const StaffDashboard = () => {
             setNotes('');
             setFuelStatus('Full');
         } catch (err) {
-            setMessage({ type: 'danger', text: err.response?.data?.message || 'Handover Failed' });
+            setMessage({ type: 'danger', text: err.response?.data || 'Handover Failed' });
         } finally {
             setLoading(false);
         }
@@ -129,7 +129,7 @@ const StaffDashboard = () => {
             const data = await ApiService.getBooking(bookingId);
             setBookingDetails(data);
 
-            if (data.bookingStatus !== 'ACTIVE') {
+            if (data.bookingStatus.toUpperCase() !== 'ACTIVE') {
                 setMessage({ type: 'warning', text: `This booking is ${data.bookingStatus}. Only ACTIVE bookings can be returned.` });
                 setLoading(false);
                 return;
@@ -138,7 +138,7 @@ const StaffDashboard = () => {
             setActiveTab('return');
             setShowModal(true);
         } catch (err) {
-            setMessage({ type: 'danger', text: 'Booking not found or error fetching details.' });
+            setMessage({ type: 'danger', text: err.response?.data || 'Booking not found or error fetching details.' });
         } finally {
             setLoading(false);
         }
@@ -166,7 +166,7 @@ const StaffDashboard = () => {
             setNotes('');
             setFuelStatus('Full');
         } catch (err) {
-            setMessage({ type: 'danger', text: err.response?.data?.message || 'Return Failed' });
+            setMessage({ type: 'danger', text: err.response?.data || 'Return Failed' });
         } finally {
             setLoading(false);
         }
@@ -232,8 +232,8 @@ const StaffDashboard = () => {
                                                     <Hash className="h-5 w-5 text-muted-foreground group-focus-within:text-primary transition-colors" />
                                                 </div>
                                                 <Input
-                                                    type="number"
-                                                    placeholder="e.g. 101"
+                                                    type="text"
+                                                    placeholder="e.g. 101 or BOK-..."
                                                     value={bookingId}
                                                     onChange={(e) => setBookingId(e.target.value)}
                                                     className="h-16 pl-16 bg-muted/30 border-none rounded-2xl text-2xl font-black text-center placeholder:text-muted-foreground placeholder:text-lg focus-visible:ring-primary focus-visible:ring-offset-0 shadow-inner"

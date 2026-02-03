@@ -4,11 +4,6 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace FleetManagementSystem.Api.Models;
 
-public enum AvailabilityStatus
-{
-    Y, N, YES, NO
-}
-
 [Table("car_master")]
 public class CarMaster
 {
@@ -39,14 +34,13 @@ public class CarMaster
     public HubMaster Hub { get; set; }
 
     [Column("is_available")]
-    [EnumDataType(typeof(AvailabilityStatus))]
-    public AvailabilityStatus IsAvailable { get; set; }
+    public string IsAvailable { get; set; }
 
     [Column("maintenance_due_date")]
     public DateTime? MaintenanceDueDate { get; set; }
 
     public bool IsActuallyAvailable()
     {
-        return IsAvailable == AvailabilityStatus.Y || IsAvailable == AvailabilityStatus.YES;
+        return IsAvailable == "Y" || IsAvailable == "YES" || IsAvailable == "True";
     }
 }

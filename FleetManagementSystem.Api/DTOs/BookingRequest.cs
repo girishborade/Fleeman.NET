@@ -12,5 +12,5 @@ public class BookingRequest
     public DateTime StartDate { get; set; }
     public DateTime EndDate { get; set; }
     public List<int> AddOnIds { get; set; }
-    public string Email { get; set; }
+    public string? Email { get; set; }
 }
