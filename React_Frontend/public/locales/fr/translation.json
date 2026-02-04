@@ -1,0 +1,61 @@
+{
+    "home": {
+        "heroTitle": "Gestion de Flotte Premium",
+        "heroSub": "Découvrez les meilleurs services de flotte avec nos voitures premium et un excellent support.",
+        "bookNow": "Réserver",
+        "learnMore": "En savoir plus",
+        "whyChoose": "Pourquoi nous choisir",
+        "whyChooseSub": "Nous offrons le meilleur service de l'industrie avec des tarifs abordables et un support 24/7.",
+        "safeSecure": "Sûr et Sécurisé",
+        "safeSecureSub": "Toutes nos voitures sont désinfectées et le suivi est activé.",
+        "bestRates": "Meilleurs Tarifs",
+        "bestRatesSub": "Nous offrons les prix les plus compétitifs du marché.",
+        "support": "Support 24/7",
+        "supportSub": "Notre équipe de support est toujours disponible pour vous aider.",
+        "quickBook": "Réservation Rapide",
+        "quickBookSub": "Réservez votre trajet premium",
+        "pickupLoc": "Lieu de prise en charge",
+        "pickupPlaceholder": "Ville, Aéroport ou Adresse",
+        "diffLoc": "Je pourrais rendre la voiture à un endroit différent",
+        "returnLoc": "Lieu de retour",
+        "returnPlaceholder": "Entrez le lieu de retour",
+        "pickupDate": "Date de prise en charge",
+        "returnDate": "Date de retour",
+        "time": "Heure",
+        "findVehicle": "Trouver un véhicule",
+        "sloganLine1": "CONDUISEZ",
+        "sloganLine2": "LÉGENDAIRE",
+        "sloganSub": "Découvrez l'avenir de la mobilité avec notre flotte premium. Où le luxe rencontre la technologie.",
+        "exploreFleet": "EXPLORER LA FLOTTE",
+        "watchVideo": "REGARDER LA VIDÉO",
+        "statsMembers": "50K+ MEMBRES",
+        "statsDealers": "REVENDEURS VÉRIFIÉS",
+        "whyChooseTitle": "Conçu pour",
+        "whyChooseHighlight": "l'Excellence",
+        "safetyTitle": "Sécurité sans compromis",
+        "safetyDesc": "Chaque véhicule subit une inspection rigoureuse en 150 points. Votre sécurité est notre priorité absolue.",
+        "safetyTag1": "Noté 5 étoiles",
+        "safetyTag2": "SOS 24/7",
+        "priceTitle": "Garantie du meilleur tarif",
+        "priceDesc": "Nous nous alignons sur le prix de tout concurrent pour la même classe de véhicule.",
+        "supportTitle": "Support 24/7",
+        "supportDesc": "Toujours là pour vous.",
+        "techTitle": "Suivi en direct",
+        "techDesc": "Données GPS en temps réel."
+    },
+    "nav": {
+        "home": "Accueil",
+        "about": "À propos",
+        "contact": "Contact",
+        "login": "Connexion",
+        "register": "S'inscrire",
+        "dashboard": "Tableau de bord"
+    },
+    "footer": {
+        "rights": "Tous droits réservés."
+    },
+    "booking": {
+        "title": "Vos Réservations",
+        "status": "Statut"
+    }
+}

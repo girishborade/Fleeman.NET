@@ -1,0 +1,61 @@
+{
+    "home": {
+        "heroTitle": "Premium Fleet Management",
+        "heroSub": "Experience the best in class fleet services with our premium cars and excellent support.",
+        "bookNow": "Book Now",
+        "learnMore": "Learn More",
+        "whyChoose": "Why Choose Us",
+        "whyChooseSub": "We provide the best service in the industry with affordable rates and 24/7 support.",
+        "safeSecure": "Safe & Secure",
+        "safeSecureSub": "All our cars are sanitized and tracking enabled.",
+        "bestRates": "Best Rates",
+        "bestRatesSub": "We offer the most competitive prices in the market.",
+        "support": "24/7 Support",
+        "supportSub": "Our support team is always available to assist you.",
+        "quickBook": "Quick Book",
+        "quickBookSub": "Reserve your premium ride",
+        "pickupLoc": "Pick-up Location",
+        "pickupPlaceholder": "City, Airport, or Address",
+        "diffLoc": "I may return the car to a different location",
+        "returnLoc": "Return Location",
+        "returnPlaceholder": "Enter return location",
+        "pickupDate": "Pick-up Date",
+        "returnDate": "Return Date",
+        "time": "Time",
+        "findVehicle": "Find Vehicle",
+        "sloganLine1": "DRIVE",
+        "sloganLine2": "LEGENDARY",
+        "sloganSub": "Experience the future of mobility with our premium fleet. Where luxury meets technology.",
+        "exploreFleet": "EXPLORE FLEET",
+        "watchVideo": "WATCH VIDEO",
+        "statsMembers": "50K+ MEMBERS",
+        "statsDealers": "VERIFIED DEALERS",
+        "whyChooseTitle": "Engineered for",
+        "whyChooseHighlight": "Excellence",
+        "safetyTitle": "Uncompromised Safety",
+        "safetyDesc": "Every vehicle undergoes a rigorous 150-point inspection. Your safety is our non-negotiable priority.",
+        "safetyTag1": "5-Star Rated",
+        "safetyTag2": "24/7 SOS",
+        "priceTitle": "Best Rate Guarantee",
+        "priceDesc": "We match any competitor's price for the same vehicle class.",
+        "supportTitle": "24/7 Support",
+        "supportDesc": "Always here for you.",
+        "techTitle": "Live Tracking",
+        "techDesc": "Real-time GPS data."
+    },
+    "nav": {
+        "home": "Home",
+        "about": "About Us",
+        "contact": "Contact",
+        "login": "Login",
+        "register": "Register",
+        "dashboard": "Dashboard"
+    },
+    "footer": {
+        "rights": "All rights reserved."
+    },
+    "booking": {
+        "title": "Your Bookings",
+        "status": "Status"
+    }
+}

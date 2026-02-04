@@ -1,25 +1,37 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, Suspense, lazy } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Navbar from './components/layout/Navbar';
 import Footer from './components/layout/Footer';
-import Home from './pages/client/Home';
-import About from './pages/client/About';
-import Login from './pages/auth/Login';
-import Register from './pages/auth/Register';
-import Booking from './pages/client/Booking';
-import MyBookings from './pages/client/MyBookings';
-import CarSelection from './pages/client/CarSelection';
-import HubSelection from './pages/client/HubSelection';
-import StaffDashboard from './pages/staff/StaffDashboard';
-import AdminDashboard from './pages/admin/AdminDashboard';
-import AdminBookings from './pages/admin/AdminBookings';
-import StaffManagement from './pages/admin/StaffManagement';
-import ManageBooking from './pages/client/ManageBooking';
-import CustomerCare from './pages/client/CustomerCare';
-import ExploreVehicles from './pages/client/ExploreVehicles';
-
+import { Loader2 } from 'lucide-react';
 import { jwtDecode } from "jwt-decode";
 import AuthService from './services/authService';
+
+// Lazy imports
+const Home = lazy(() => import('./pages/client/Home'));
+const About = lazy(() => import('./pages/client/About'));
+const Login = lazy(() => import('./pages/auth/Login'));
+const Register = lazy(() => import('./pages/auth/Register'));
+const Booking = lazy(() => import('./pages/client/Booking'));
+const MyBookings = lazy(() => import('./pages/client/MyBookings'));
+const CarSelection = lazy(() => import('./pages/client/CarSelection'));
+const HubSelection = lazy(() => import('./pages/client/HubSelection'));
+const StaffDashboard = lazy(() => import('./pages/staff/StaffDashboard'));
+const AdminDashboard = lazy(() => import('./pages/admin/AdminDashboard'));
+const AdminBookings = lazy(() => import('./pages/admin/AdminBookings'));
+const StaffManagement = lazy(() => import('./pages/admin/StaffManagement'));
+const ManageBooking = lazy(() => import('./pages/client/ManageBooking'));
+const CustomerCare = lazy(() => import('./pages/client/CustomerCare'));
+const ExploreVehicles = lazy(() => import('./pages/client/ExploreVehicles'));
+
+// Import Protected Route
+import ProtectedRoute from './components/auth/ProtectedRoute';
+
+// Loading Component
+const PageLoader = () => (
+  <div className="flex h-screen w-full items-center justify-center bg-background">
+    <Loader2 className="h-10 w-10 animate-spin text-primary" />
+  </div>
+);
 
 function App() {
   const [theme, setTheme] = useState(localStorage.getItem('theme') || 'dark');
@@ -61,25 +73,40 @@ function App() {
       <div className="flex flex-col min-h-screen bg-background text-foreground">
         <Navbar theme={theme} toggleTheme={toggleTheme} />
         <main className="flex-grow">
-          <Routes>
-            <Route path="/" element={<Home />} />
-            <Route path="/about" element={<About />} />
-            <Route path="/login" element={<Login />} />
-            <Route path="/register" element={<Register />} />
-            <Route path="/customer-care" element={<CustomerCare />} />
-            <Route path="/explore-vehicles" element={<ExploreVehicles />} />
-            <Route path="/booking" element={<Booking />} />
-            <Route path="/manage-booking" element={<ManageBooking />} />
-            <Route path="/my-bookings" element={<MyBookings />} />
-            <Route path="/select-car" element={<CarSelection />} />
-            <Route path="/select-hub" element={<HubSelection />} />
-            <Route path="/staff/dashboard" element={<StaffDashboard />} />
-            <Route path="/staff/handover" element={<StaffDashboard />} />
-            <Route path="/staff/return" element={<StaffDashboard />} />
-            <Route path="/admin/dashboard" element={<AdminDashboard />} />
-            <Route path="/admin/bookings" element={<AdminBookings />} />
-            <Route path="/admin/staff" element={<StaffManagement />} />
-          </Routes>
+          <Suspense fallback={<PageLoader />}>
+            <Routes>
+              {/* Public Routes */}
+              <Route path="/" element={<Home />} />
+              <Route path="/about" element={<About />} />
+              <Route path="/login" element={<Login />} />
+              <Route path="/register" element={<Register />} />
+              <Route path="/customer-care" element={<CustomerCare />} />
+              <Route path="/explore-vehicles" element={<ExploreVehicles />} />
+
+              {/* Client Protected Routes */}
+              <Route element={<ProtectedRoute allowedRoles={['ROLE_USER', 'ROLE_ADMIN', 'ROLE_STAFF']} />}>
+                <Route path="/booking" element={<Booking />} />
+                <Route path="/manage-booking" element={<ManageBooking />} />
+                <Route path="/my-bookings" element={<MyBookings />} />
+                <Route path="/select-car" element={<CarSelection />} />
+                <Route path="/select-hub" element={<HubSelection />} />
+              </Route>
+
+              {/* Staff Protected Routes */}
+              <Route element={<ProtectedRoute allowedRoles={['ROLE_STAFF', 'ROLE_ADMIN']} />}>
+                <Route path="/staff/dashboard" element={<StaffDashboard />} />
+                <Route path="/staff/handover" element={<StaffDashboard />} />
+                <Route path="/staff/return" element={<StaffDashboard />} />
+              </Route>
+
+              {/* Admin Protected Routes */}
+              <Route element={<ProtectedRoute allowedRoles={['ROLE_ADMIN']} />}>
+                <Route path="/admin/dashboard" element={<AdminDashboard />} />
+                <Route path="/admin/bookings" element={<AdminBookings />} />
+                <Route path="/admin/staff" element={<StaffManagement />} />
+              </Route>
+            </Routes>
+          </Suspense>
         </main>
         <Footer />
       </div>
