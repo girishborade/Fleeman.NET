@@ -33,6 +33,12 @@ public class BookingController : ControllerBase
         return Ok(_bookingService.GetAllBookings());
     }
 
+    [HttpGet("hub/{hubId}")]
+    public ActionResult<List<BookingResponse>> GetBookingsByHub(int hubId)
+    {
+        return Ok(_bookingService.GetBookingsByHub(hubId));
+    }
+
     [HttpPost("create")]
     public ActionResult<BookingResponse> CreateBooking([FromBody] BookingRequest request)
     {

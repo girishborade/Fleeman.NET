@@ -1023,15 +1023,28 @@ const Booking = () => {
                                     {selectedAddOnIds.length > 0 && (
                                         <div className="space-y-2 pt-2 border-t border-muted-foreground/10">
                                             <span className="text-xs font-bold text-muted-foreground uppercase tracking-widest">Selected Extras</span>
-                                            {addOns.filter(a => selectedAddOnIds.includes(a.addOnId)).map(a => (
-                                                <div key={a.addOnId} className="flex justify-between text-sm px-2">
-                                                    <span className="text-muted-foreground flex items-center gap-2">
-                                                        <div className="w-1 h-1 bg-primary rounded-full" />
-                                                        {a.addOnName} {a.addOnName.toLowerCase().includes('child seat') ? `(x${childSeatQty})` : ''}
-                                                    </span>
-                                                    <span className="font-medium">₹{(a.addOnName.toLowerCase().includes('child seat') ? a.addonDailyRate * childSeatQty : a.addonDailyRate).toFixed(0)}</span>
-                                                </div>
-                                            ))}
+                                            {addOns.filter(a => selectedAddOnIds.includes(a.addOnId)).map(a => {
+                                                const isChildSeat = a.addOnName.toLowerCase().includes('child seat');
+                                                const qty = isChildSeat ? childSeatQty : 1;
+                                                const dailyRate = a.addonDailyRate * qty;
+                                                const days = calculateRentalDays();
+                                                const totalForAddon = dailyRate * days;
+
+                                                return (
+                                                    <div key={a.addOnId} className="px-2 py-2 bg-muted/20 rounded-lg">
+                                                        <div className="flex justify-between items-start mb-1">
+                                                            <span className="text-muted-foreground flex items-center gap-2 font-medium">
+                                                                <div className="w-1 h-1 bg-primary rounded-full" />
+                                                                {a.addOnName} {isChildSeat ? `(x${childSeatQty})` : ''}
+                                                            </span>
+                                                            <span className="font-bold text-foreground">₹{totalForAddon.toFixed(0)}</span>
+                                                        </div>
+                                                        <div className="text-xs text-muted-foreground pl-3">
+                                                            ₹{dailyRate.toFixed(0)}/day × {days} day{days > 1 ? 's' : ''}
+                                                        </div>
+                                                    </div>
+                                                );
+                                            })}
                                         </div>
                                     )}
 

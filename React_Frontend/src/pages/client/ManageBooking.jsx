@@ -286,12 +286,12 @@ const ManageBooking = () => {
                                         {isCancelled ? 'Booking Reference Nullified' : 'Abort Reservation'}
                                     </Button>
                                     <Button
-                                        className="h-16 rounded-2xl bg-primary text-primary-foreground shadow-lg shadow-primary/25 font-bold text-lg"
+                                        className="h-16 rounded-2xl bg-primary text-primary-foreground shadow-lg shadow-primary/25 font-bold text-lg disabled:opacity-50 disabled:cursor-not-allowed"
                                         onClick={() => window.print()}
-                                        disabled={isCancelled}
+                                        disabled={isCancelled || !isCompleted}
                                     >
                                         <Printer className="mr-2 h-5 w-5" />
-                                        Generate Invoice
+                                        {isCompleted ? 'Generate Invoice' : 'Invoice Available After Return'}
                                     </Button>
                                 </div>
                             </CardContent>

@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import ApiService from '../../services/api';
+import AuthService from '../../services/authService';
 import StaffBookingWizard from '../../components/staff/StaffBookingWizard';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -33,6 +34,12 @@ const StaffDashboard = () => {
     const [message, setMessage] = useState({ type: '', text: '' });
     const [loading, setLoading] = useState(false);
 
+    // Hub Bookings State
+    const [hubBookings, setHubBookings] = useState([]);
+    const [filteredBookings, setFilteredBookings] = useState([]);
+    const [statusFilter, setStatusFilter] = useState('ALL');
+    const [hubLoading, setHubLoading] = useState(false);
+
     // Handover Modal State
     const [showModal, setShowModal] = useState(false);
     const [bookingDetails, setBookingDetails] = useState(null);
@@ -43,6 +50,48 @@ const StaffDashboard = () => {
     const [selectedCar, setSelectedCar] = useState(null);
     const [fuelStatus, setFuelStatus] = useState('Full');
     const [notes, setNotes] = useState('');
+
+    // Fetch hub bookings on component mount
+    useEffect(() => {
+        const user = AuthService.getCurrentUser();
+        if (user && user.hubId) {
+            fetchHubBookings(user.hubId);
+        }
+    }, []);
+
+    // Filter bookings when status filter changes
+    useEffect(() => {
+        if (statusFilter === 'ALL') {
+            setFilteredBookings(hubBookings);
+        } else {
+            setFilteredBookings(hubBookings.filter(b => b.bookingStatus === statusFilter));
+        }
+    }, [statusFilter, hubBookings]);
+
+    const fetchHubBookings = async (hubId) => {
+        setHubLoading(true);
+        try {
+            const bookings = await ApiService.getBookingsByHub(hubId);
+            setHubBookings(bookings || []);
+            setFilteredBookings(bookings || []);
+        } catch (err) {
+            console.error('Error fetching hub bookings:', err);
+            // Don't set error message here - it will show on other tabs
+            // The empty state will handle showing no bookings
+        } finally {
+            setHubLoading(false);
+        }
+    };
+
+    const handleQuickAction = (booking, action) => {
+        setBookingId(booking.bookingId.toString());
+        setActiveTab(action);
+        if (action === 'handover') {
+            handleFetchBooking();
+        } else if (action === 'return') {
+            handleReturn();
+        }
+    };
 
     const handleFetchBooking = async () => {
         if (!bookingId) return;
@@ -188,7 +237,7 @@ const StaffDashboard = () => {
                 {!showModal && (
                     <Card className="border-none shadow-2xl bg-card overflow-hidden text-left mx-auto max-w-4xl">
                         <CardHeader className="p-0 border-b border-border/50 bg-muted/50">
-                            <Tabs value={activeTab} onValueChange={(v) => { if (!loading) setActiveTab(v); }} className="w-full">
+                            <Tabs value={activeTab} onValueChange={(v) => { if (!loading) { setActiveTab(v); setMessage({ type: '', text: '' }); } }} className="w-full">
                                 <TabsList className="w-full h-20 bg-transparent rounded-none p-4 gap-4">
                                     <TabsTrigger value="handover" className="flex-1 rounded-xl font-black uppercase text-[10px] tracking-widest h-12 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-lg shadow-primary/20 transition-all gap-2">
                                         <Key className="h-3.5 w-3.5" /> Handover
@@ -199,12 +248,117 @@ const StaffDashboard = () => {
                                     <TabsTrigger value="booking" className="flex-1 rounded-xl font-black uppercase text-[10px] tracking-widest h-12 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-lg shadow-primary/20 transition-all gap-2">
                                         <Calendar className="h-3.5 w-3.5" /> Instant Res
                                     </TabsTrigger>
+                                    <TabsTrigger value="hub-bookings" className="flex-1 rounded-xl font-black uppercase text-[10px] tracking-widest h-12 data-[state=active]:bg-purple-600 data-[state=active]:text-white data-[state=active]:shadow-lg shadow-purple-500/20 transition-all gap-2">
+                                        <ClipboardList className="h-3.5 w-3.5" /> Hub Bookings
+                                    </TabsTrigger>
                                 </TabsList>
                             </Tabs>
                         </CardHeader>
                         <CardContent className="p-12">
                             {activeTab === 'booking' ? (
                                 <StaffBookingWizard onClose={() => setActiveTab('handover')} />
+                            ) : activeTab === 'hub-bookings' ? (
+                                <div className="space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-500">
+                                    {/* Status Filters */}
+                                    <div className="flex gap-2 flex-wrap">
+                                        {['ALL', 'CONFIRMED', 'ACTIVE', 'COMPLETED', 'CANCELLED'].map(status => (
+                                            <Button
+                                                key={status}
+                                                variant={statusFilter === status ? 'default' : 'outline'}
+                                                size="sm"
+                                                onClick={() => setStatusFilter(status)}
+                                                className="rounded-full font-bold text-[10px] uppercase tracking-widest"
+                                            >
+                                                {status}
+                                            </Button>
+                                        ))}
+                                    </div>
+
+                                    {/* Bookings List */}
+                                    {hubLoading ? (
+                                        <div className="flex flex-col items-center justify-center py-12 gap-4">
+                                            <Loader2 className="h-10 w-10 text-primary animate-spin" />
+                                            <p className="text-muted-foreground animate-pulse">Loading hub bookings...</p>
+                                        </div>
+                                    ) : filteredBookings.length === 0 ? (
+                                        <div className="p-12 text-center bg-muted/30 rounded-2xl">
+                                            <ClipboardList className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                                            <p className="text-sm font-bold text-muted-foreground uppercase tracking-widest">No bookings found for this hub</p>
+                                        </div>
+                                    ) : (
+                                        <div className="grid gap-4 max-h-[500px] overflow-y-auto pr-2">
+                                            {filteredBookings.map(booking => {
+                                                const isConfirmed = booking.bookingStatus === 'CONFIRMED';
+                                                const isActive = booking.bookingStatus === 'ACTIVE';
+                                                const isCompleted = booking.bookingStatus === 'COMPLETED';
+                                                const isCancelled = booking.bookingStatus === 'CANCELLED';
+
+                                                return (
+                                                    <div
+                                                        key={booking.bookingId}
+                                                        className="p-6 rounded-2xl border-2 border-border/50 bg-card hover:border-primary/20 transition-all"
+                                                    >
+                                                        <div className="flex justify-between items-start mb-4">
+                                                            <div>
+                                                                <div className="flex items-center gap-3 mb-2">
+                                                                    <h4 className="font-black text-lg">#{booking.confirmationNumber}</h4>
+                                                                    <Badge
+                                                                        variant={isCancelled ? 'destructive' : isCompleted ? 'secondary' : isActive ? 'default' : 'outline'}
+                                                                        className="font-bold uppercase text-[10px] tracking-widest"
+                                                                    >
+                                                                        {booking.bookingStatus}
+                                                                    </Badge>
+                                                                </div>
+                                                                <p className="text-sm text-muted-foreground">
+                                                                    <User className="h-3 w-3 inline mr-1" />
+                                                                    {booking.customerName}
+                                                                </p>
+                                                            </div>
+                                                            <div className="text-right">
+                                                                <p className="text-[10px] font-black uppercase text-muted-foreground tracking-widest mb-1">Vehicle</p>
+                                                                <p className="font-bold text-sm">{booking.carName}</p>
+                                                            </div>
+                                                        </div>
+
+                                                        <div className="grid grid-cols-2 gap-4 mb-4 p-4 bg-muted/30 rounded-xl">
+                                                            <div>
+                                                                <p className="text-[10px] font-black uppercase text-muted-foreground tracking-widest mb-1">Pickup</p>
+                                                                <p className="text-sm font-bold">{new Date(booking.startDate).toLocaleDateString()}</p>
+                                                            </div>
+                                                            <div>
+                                                                <p className="text-[10px] font-black uppercase text-muted-foreground tracking-widest mb-1">Return</p>
+                                                                <p className="text-sm font-bold">{new Date(booking.endDate).toLocaleDateString()}</p>
+                                                            </div>
+                                                        </div>
+
+                                                        {(isConfirmed || isActive) && (
+                                                            <div className="flex gap-2">
+                                                                {isConfirmed && (
+                                                                    <Button
+                                                                        size="sm"
+                                                                        className="flex-1 rounded-xl font-bold uppercase text-[10px] tracking-widest bg-primary"
+                                                                        onClick={() => handleQuickAction(booking, 'handover')}
+                                                                    >
+                                                                        <Key className="h-3 w-3 mr-1" /> Handover
+                                                                    </Button>
+                                                                )}
+                                                                {isActive && (
+                                                                    <Button
+                                                                        size="sm"
+                                                                        className="flex-1 rounded-xl font-bold uppercase text-[10px] tracking-widest bg-emerald-600 hover:bg-emerald-700"
+                                                                        onClick={() => handleQuickAction(booking, 'return')}
+                                                                    >
+                                                                        <Ship className="h-3 w-3 mr-1" /> Return
+                                                                    </Button>
+                                                                )}
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                );
+                                            })}
+                                        </div>
+                                    )}
+                                </div>
                             ) : (
                                 <div className="space-y-8 animate-in fade-in slide-in-from-bottom-2 duration-500">
                                     {message.text && (

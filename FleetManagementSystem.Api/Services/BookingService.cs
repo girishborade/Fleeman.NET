@@ -342,6 +342,21 @@ public class BookingService : IBookingService
          return MapToResponse(booking);
     }
 
+    public List<BookingResponse> GetBookingsByHub(int hubId)
+    {
+        var bookings = _context.Bookings
+            .Include(b => b.Car)
+            .Include(b => b.CarType)
+            .Include(b => b.Customer)
+            .Include(b => b.PickupHub)
+            .Include(b => b.ReturnHub)
+            .Where(b => b.PickupHubId == hubId || b.ReturnHubId == hubId)
+            .OrderByDescending(b => b.BookingDate)
+            .ToList();
+
+        return bookings.Select(MapToResponse).ToList();
+    }
+
     private BookingResponse MapToResponse(BookingHeaderTable booking)
     {
         // Must fetch details for addons if not already loaded (lazy loading or explicit load)
@@ -362,6 +377,19 @@ public class BookingService : IBookingService
         double dailyRate = booking.DailyRate ?? 0;
         double totalAmt = (days * dailyRate) + totalAddonAmt;
 
+        // Build detailed add-on list
+        var addOnDetails = details
+            .Where(d => d.AddOn != null)
+            .GroupBy(d => d.AddOnId)
+            .Select(g => new AddOnDetailDto
+            {
+                AddOnId = g.Key ?? 0,
+                AddOnName = g.First().AddOn.AddOnName,
+                DailyRate = g.First().AddonRate,
+                Quantity = g.Count() // Count how many times this add-on appears (for child seats)
+            })
+            .ToList();
+
         return new BookingResponse
         {
             BookingId = booking.BookingId,
@@ -380,7 +408,8 @@ public class BookingService : IBookingService
             DailyRate = booking.DailyRate,
             TotalAmount = totalAmt,
             TotalAddonAmount = totalAddonAmt,
-            SelectedAddOns = details.Where(d => d.AddOn != null).Select(d => d.AddOn.AddOnName).ToList()
+            SelectedAddOns = details.Where(d => d.AddOn != null).Select(d => d.AddOn.AddOnName).ToList(),
+            AddOnDetails = addOnDetails
         };
     }
 }

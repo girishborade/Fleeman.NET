@@ -22,4 +22,5 @@ public class BookingResponse
     public double? TotalAmount { get; set; }
     public double? TotalAddonAmount { get; set; }
     public List<string> SelectedAddOns { get; set; }
+    public List<AddOnDetailDto> AddOnDetails { get; set; } // Detailed add-on info with rates
 }

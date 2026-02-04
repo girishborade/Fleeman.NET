@@ -11,6 +11,7 @@ public interface IBookingService
     BookingResponse GetBooking(string bookingId);
     List<BookingResponse> GetBookingsByEmail(string email);
     List<BookingResponse> GetAllBookings();
+    List<BookingResponse> GetBookingsByHub(int hubId);
     BookingResponse CancelBooking(long bookingId);
     BookingResponse ModifyBooking(long bookingId, BookingRequest request);
 }

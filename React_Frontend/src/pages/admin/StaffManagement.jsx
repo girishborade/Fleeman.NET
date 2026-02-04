@@ -212,11 +212,11 @@ const StaffManagement = () => {
                             <CardHeader className="p-8 bg-muted/50 border-bottom border-border/50 flex flex-row items-center justify-between">
                                 <div>
                                     <CardTitle className="text-2xl font-black uppercase tracking-tight">Node Ecosystem</CardTitle>
-                                    <CardDescription className="font-bold flex items-center gap-2 mt-1">
+                                    <div className="flex items-center gap-2 mt-1">
                                         <Badge variant="secondary" className="bg-primary/10 text-primary border-none font-black text-[10px] uppercase px-3 py-1">
                                             {staffList.length} Active Operators Detected
                                         </Badge>
-                                    </CardDescription>
+                                    </div>
                                 </div>
                                 <div className="h-12 w-12 rounded-xl bg-muted flex items-center justify-center text-muted-foreground">
                                     <Users className="h-6 w-6" />

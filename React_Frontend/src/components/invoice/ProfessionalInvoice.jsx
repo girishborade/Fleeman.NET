@@ -9,7 +9,7 @@ const ProfessionalInvoice = ({ booking }) => {
     const start = new Date(booking.startDate);
     const end = new Date(booking.endDate);
     const days = Math.max(1, Math.ceil(Math.abs(end - start) / (1000 * 60 * 60 * 24)));
-    
+
     // Calculate costs
     const baseRentalTotal = (booking.dailyRate || 0) * days;
     const addonTotal = booking.totalAddonAmount || 0;
@@ -194,22 +194,67 @@ const ProfessionalInvoice = ({ booking }) => {
                             <td>{days} day{days > 1 ? 's' : ''}</td>
                             <td className="text-right">₹{baseRentalTotal.toLocaleString('en-IN')}</td>
                         </tr>
-                        {addonTotal > 0 && (
-                            <tr>
-                                <td>
-                                    <strong>Add-on Services</strong>
-                                    {booking.selectedAddOns && booking.selectedAddOns.length > 0 && (
-                                        <div className="addon-list">
-                                            {booking.selectedAddOns.map((addon, idx) => (
-                                                <span key={idx} className="addon-item">• {addon}</span>
-                                            ))}
-                                        </div>
-                                    )}
-                                </td>
-                                <td>-</td>
-                                <td>-</td>
-                                <td className="text-right">₹{addonTotal.toLocaleString('en-IN')}</td>
-                            </tr>
+                        {/* Add-on Services - Use detailed data if available */}
+                        {booking.addOnDetails && booking.addOnDetails.length > 0 ? (
+                            <>
+                                {booking.addOnDetails.map((addon, idx) => {
+                                    const totalForAddon = addon.dailyRate * addon.quantity * days;
+                                    const displayName = addon.quantity > 1
+                                        ? `${addon.addOnName} (x${addon.quantity})`
+                                        : addon.addOnName;
+                                    const effectiveDailyRate = addon.dailyRate * addon.quantity;
+
+                                    return (
+                                        <tr key={idx}>
+                                            <td>
+                                                <strong>Add-on Service</strong>
+                                                <br />
+                                                <span className="item-description">{displayName}</span>
+                                            </td>
+                                            <td>₹{effectiveDailyRate.toLocaleString('en-IN')}/day</td>
+                                            <td>{days} day{days > 1 ? 's' : ''}</td>
+                                            <td className="text-right">₹{totalForAddon.toLocaleString('en-IN')}</td>
+                                        </tr>
+                                    );
+                                })}
+                            </>
+                        ) : (
+                            <>
+                                {/* Fallback for old data without addOnDetails */}
+                                {booking.selectedAddOns && booking.selectedAddOns.length > 0 && (
+                                    <>
+                                        {booking.selectedAddOns.map((addonName, idx) => {
+                                            const addonDailyRate = (addonTotal / booking.selectedAddOns.length) / days;
+                                            const addonTotal_item = addonDailyRate * days;
+
+                                            return (
+                                                <tr key={idx}>
+                                                    <td>
+                                                        <strong>Add-on Service</strong>
+                                                        <br />
+                                                        <span className="item-description">{addonName}</span>
+                                                    </td>
+                                                    <td>₹{addonDailyRate.toFixed(0)}/day</td>
+                                                    <td>{days} day{days > 1 ? 's' : ''}</td>
+                                                    <td className="text-right">₹{addonTotal_item.toLocaleString('en-IN')}</td>
+                                                </tr>
+                                            );
+                                        })}
+                                    </>
+                                )}
+                                {addonTotal > 0 && (!booking.selectedAddOns || booking.selectedAddOns.length === 0) && (
+                                    <tr>
+                                        <td>
+                                            <strong>Add-on Services</strong>
+                                            <br />
+                                            <span className="item-description">Various add-ons selected</span>
+                                        </td>
+                                        <td>-</td>
+                                        <td>{days} day{days > 1 ? 's' : ''}</td>
+                                        <td className="text-right">₹{addonTotal.toLocaleString('en-IN')}</td>
+                                    </tr>
+                                )}
+                            </>
                         )}
                     </tbody>
                     <tfoot>
