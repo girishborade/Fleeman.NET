@@ -9,107 +9,10 @@ import {
     DropdownMenuItem,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Languages, ShieldCheck, Tag, Headset, ArrowRight, Users, Car, MapPin, Calendar, Clock, CheckCircle2 } from "lucide-react";
-import { motion, useScroll, useTransform } from 'framer-motion';
-// Changed to relative imports to fix potential alias resolution issue
-import { Checkbox } from "../../components/ui/checkbox";
-import { Label } from "../../components/ui/label";
+import { Languages, ShieldCheck, Tag, Headset, ArrowRight, Users, CheckCircle2, MapPin } from "lucide-react";
+import { motion, useScroll } from 'framer-motion';
 
-const HeroBookingWidget = () => {
-    const { t } = useTranslation();
-    const [differentLocation, setDifferentLocation] = useState(false);
 
-    return (
-        <div className="glass-card p-6 md:p-8 rounded-3xl border-t border-white/20 shadow-2xl backdrop-blur-2xl relative overflow-hidden group">
-            <div className="absolute inset-0 bg-gradient-to-br from-white/10 to-transparent pointer-events-none" />
-
-            <div className="flex items-center gap-3 mb-6">
-                <div className="p-3 rounded-xl bg-primary/20 text-primary">
-                    <Car className="h-6 w-6" />
-                </div>
-                <div>
-                    <h3 className="text-xl font-bold">{t('home.quickBook')}</h3>
-                    <p className="text-xs text-muted-foreground">{t('home.quickBookSub')}</p>
-                </div>
-            </div>
-
-            <div className="space-y-5 relative z-10">
-                {/* Pickup Location */}
-                <div className="space-y-2">
-                    <label className="text-sm font-medium ml-1 flex items-center gap-2">
-                        <MapPin className="w-4 h-4 text-primary" /> {t('home.pickupLoc')}
-                    </label>
-                    <input type="text" placeholder={t('home.pickupPlaceholder')} className="w-full h-11 rounded-xl bg-background/50 border border-white/10 px-4 focus:ring-2 focus:ring-primary/50 outline-none transition-all placeholder:text-muted-foreground/50" />
-                </div>
-
-                {/* Different Return Location Checkbox */}
-                <div className="flex items-center space-x-2 py-1">
-                    <Checkbox
-                        id="return-location-mode"
-                        checked={differentLocation}
-                        onCheckedChange={setDifferentLocation}
-                        className="border-white/20 data-[state=checked]:bg-primary data-[state=checked]:text-primary-foreground"
-                    />
-                    <Label htmlFor="return-location-mode" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer text-muted-foreground">
-                        {t('home.diffLoc')}
-                    </Label>
-                </div>
-
-                {/* Conditional Return Location */}
-                {differentLocation && (
-                    <motion.div
-                        initial={{ opacity: 0, height: 0 }}
-                        animate={{ opacity: 1, height: 'auto' }}
-                        className="space-y-2"
-                    >
-                        <label className="text-sm font-medium ml-1 flex items-center gap-2">
-                            <MapPin className="w-4 h-4 text-amber-500" /> {t('home.returnLoc')}
-                        </label>
-                        <input type="text" placeholder={t('home.returnPlaceholder')} className="w-full h-11 rounded-xl bg-background/50 border border-white/10 px-4 focus:ring-2 focus:ring-primary/50 outline-none transition-all placeholder:text-muted-foreground/50" />
-                    </motion.div>
-                )}
-
-                {/* Dates & Times */}
-                <div className="grid grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                        <label className="text-sm font-medium ml-1 flex items-center gap-2">
-                            <Calendar className="w-3.5 h-3.5" /> {t('home.pickupDate')}
-                        </label>
-                        <input type="date" className="w-full h-11 rounded-xl bg-background/50 border border-white/10 px-3 text-sm focus:ring-2 focus:ring-primary/50 outline-none transition-all" />
-                    </div>
-                    <div className="space-y-2">
-                        <label className="text-sm font-medium ml-1 flex items-center gap-2">
-                            <Clock className="w-3.5 h-3.5" /> {t('home.time')}
-                        </label>
-                        <input type="time" className="w-full h-11 rounded-xl bg-background/50 border border-white/10 px-3 text-sm focus:ring-2 focus:ring-primary/50 outline-none transition-all" />
-                    </div>
-                </div>
-
-                <div className="grid grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                        <label className="text-sm font-medium ml-1 flex items-center gap-2">
-                            <Calendar className="w-3.5 h-3.5" /> {t('home.returnDate')}
-                        </label>
-                        <input type="date" className="w-full h-11 rounded-xl bg-background/50 border border-white/10 px-3 text-sm focus:ring-2 focus:ring-primary/50 outline-none transition-all" />
-                    </div>
-                    <div className="space-y-2">
-                        <label className="text-sm font-medium ml-1 flex items-center gap-2">
-                            <Clock className="w-3.5 h-3.5" /> {t('home.time')}
-                        </label>
-                        <input type="time" className="w-full h-11 rounded-xl bg-background/50 border border-white/10 px-3 text-sm focus:ring-2 focus:ring-primary/50 outline-none transition-all" />
-                    </div>
-                </div>
-
-                <Link to="/booking">
-                    <Button className="w-full h-12 rounded-xl text-lg font-bold bg-gradient-to-r from-primary to-yellow-600 hover:from-primary/90 hover:to-yellow-700 text-black shadow-lg mt-2 group-hover:shadow-primary/20 transition-all">
-                        {t('home.findVehicle')}
-                        <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
-                    </Button>
-                </Link>
-            </div>
-        </div>
-    );
-};
 
 const Home = () => {
     const { t, i18n } = useTranslation();
@@ -156,19 +59,19 @@ const Home = () => {
                     <div className="absolute inset-0 bg-gradient-to-r from-background via-background/95 to-background/40" />
                 </div>
 
-                <div className="container mx-auto px-4 grid lg:grid-cols-2 gap-12 items-center relative z-10">
-                    {/* Left: Typography */}
+                <div className="container mx-auto px-4 relative z-10 text-center">
+                    {/* Centered Content */}
                     <motion.div
-                        initial={{ opacity: 0, x: -50 }}
-                        animate={{ opacity: 1, x: 0 }}
+                        initial={{ opacity: 0, y: 30 }}
+                        animate={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.8 }}
-                        className="text-left space-y-8"
+                        className="max-w-4xl mx-auto space-y-8"
                     >
                         <motion.div
                             initial={{ width: 0 }}
                             animate={{ width: "100px" }}
                             transition={{ duration: 1, delay: 0.5 }}
-                            className="h-1 bg-primary mb-6"
+                            className="h-1 bg-primary mb-6 mx-auto"
                         />
                         <h1 className="text-6xl md:text-8xl font-black tracking-tighter leading-[0.9]">
                             <span className="text-foreground">{t('home.sloganLine1')}</span>
@@ -177,11 +80,11 @@ const Home = () => {
                                 {t('home.sloganLine2')}
                             </span>
                         </h1>
-                        <p className="text-xl md:text-2xl text-muted-foreground font-light max-w-lg leading-relaxed">
+                        <p className="text-xl md:text-2xl text-muted-foreground font-light max-w-2xl mx-auto leading-relaxed">
                             {t('home.sloganSub')}
                         </p>
 
-                        <div className="flex flex-wrap gap-4 pt-4">
+                        <div className="flex flex-wrap justify-center gap-4 pt-4">
                             <Link to="/booking">
                                 <Button size="lg" className="rounded-none h-14 px-8 text-lg bg-primary hover:bg-primary/90 text-black font-bold tracking-wide">
                                     BOOK NOW
@@ -195,7 +98,7 @@ const Home = () => {
                         </div>
 
                         {/* Trust Badges Minimal */}
-                        <div className="flex gap-8 pt-8 opacity-60">
+                        <div className="flex justify-center gap-8 pt-8 opacity-60">
                             <div className="flex items-center gap-2">
                                 <Users className="w-5 h-5" />
                                 <span className="font-semibold tracking-wider text-sm">{t('home.statsMembers')}</span>
@@ -205,16 +108,6 @@ const Home = () => {
                                 <span className="font-semibold tracking-wider text-sm">{t('home.statsDealers')}</span>
                             </div>
                         </div>
-                    </motion.div>
-
-                    {/* Right: Glass Quick Booking Widget */}
-                    <motion.div
-                        initial={{ opacity: 0, y: 50 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.8, delay: 0.3 }}
-                        className="w-full max-w-md ml-auto"
-                    >
-                        <HeroBookingWidget />
                     </motion.div>
                 </div>
             </header>

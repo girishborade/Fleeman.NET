@@ -12,17 +12,37 @@ public class BookingService : IBookingService
 {
     private readonly ApplicationDbContext _context;
     private readonly IInvoiceService _invoiceService;
+    private readonly ICarService _carService;
 
-    public BookingService(ApplicationDbContext context, IInvoiceService invoiceService)
+    public BookingService(ApplicationDbContext context, IInvoiceService invoiceService, ICarService carService)
     {
         _context = context;
         _invoiceService = invoiceService;
+        _carService = carService;
     }
 
     public BookingResponse CreateBooking(BookingRequest request)
     {
-        var car = _context.Cars.Include(c => c.CarType).FirstOrDefault(c => c.CarId == request.CarId)
-                  ?? throw new ArgumentException("Invalid Car ID");
+        CarMaster car = null;
+        CarTypeMaster carType = null;
+
+        if (request.CarId > 0)
+        {
+            car = _context.Cars.Include(c => c.CarType).FirstOrDefault(c => c.CarId == request.CarId)
+                      ?? throw new ArgumentException("Invalid Car ID");
+            carType = car.CarType;
+        }
+        else if (request.CarTypeId.HasValue && request.CarTypeId.Value > 0)
+        {
+             // Defer assignment: Just validate CarType exists
+             carType = _context.CarTypes.FirstOrDefault(ct => ct.CarTypeId == request.CarTypeId.Value)
+                 ?? throw new ArgumentException("Invalid Car Type ID");
+        }
+        else
+        {
+            throw new ArgumentException("Invalid Car Selection");
+        }
+
         var customer = _context.Customers.FirstOrDefault(c => c.CustId == request.CustomerId)
                        ?? throw new ArgumentException("Invalid Customer ID");
         var pickupHub = _context.Hubs.FirstOrDefault(h => h.HubId == request.PickupHubId)
@@ -34,10 +54,10 @@ public class BookingService : IBookingService
         {
             CustomerId = customer.CustId,
             Customer = customer,
-            CarId = car.CarId,
-            Car = car,
-            CarTypeId = car.CarTypeId,
-            CarType = car.CarType,
+            CarId = car?.CarId, // Nullable
+            Car = car,          // Nullable
+            CarTypeId = carType?.CarTypeId,
+            CarType = carType,
             PickupHubId = pickupHub.HubId,
             PickupHub = pickupHub,
             ReturnHubId = returnHub.HubId,
@@ -53,14 +73,14 @@ public class BookingService : IBookingService
             Pin = customer.Pincode ?? "000000",
             State = customer.City ?? "NA", 
             EmailId = request.Email?.Trim().ToLower(),
-            Bookcar = (car.CarName != null && car.CarName.Length > 30) ? car.CarName.Substring(0, 30) : car.CarName
+            Bookcar = car != null ? ((car.CarName != null && car.CarName.Length > 30) ? car.CarName.Substring(0, 30) : car.CarName) : carType?.CarTypeName
         };
 
-        if (car.CarType != null)
+        if (carType != null)
         {
-            booking.DailyRate = car.CarType.DailyRate;
-            booking.WeeklyRate = car.CarType.WeeklyRate;
-            booking.MonthlyRate = car.CarType.MonthlyRate;
+            booking.DailyRate = carType.DailyRate;
+            booking.WeeklyRate = carType.WeeklyRate;
+            booking.MonthlyRate = carType.MonthlyRate;
         }
 
         _context.Bookings.Add(booking);
@@ -263,6 +283,7 @@ public class BookingService : IBookingService
         IQueryable<BookingHeaderTable> query = _context.Bookings
             .Include(b => b.Car)
             .Include(b => b.CarType)
+            .Include(b => b.Customer)
             .Include(b => b.PickupHub)
             .Include(b => b.ReturnHub);
 
@@ -291,6 +312,7 @@ public class BookingService : IBookingService
         return _context.Bookings
              .Include(b => b.Car)
              .Include(b => b.CarType)
+             .Include(b => b.Customer)
              .Include(b => b.PickupHub)
              .Include(b => b.ReturnHub)
              .Where(b => b.EmailId == email)
@@ -304,6 +326,7 @@ public class BookingService : IBookingService
          return _context.Bookings
              .Include(b => b.Car)
              .Include(b => b.CarType)
+             .Include(b => b.Customer)
              .Include(b => b.PickupHub)
              .Include(b => b.ReturnHub)
              .ToList() // Materialize first
@@ -374,6 +397,33 @@ public class BookingService : IBookingService
 
     private BookingResponse MapToResponse(BookingHeaderTable booking)
     {
+        // Fail-safe: Ensure Customer is loaded 
+        if (booking.Customer == null)
+        {
+            // Try lookup by ID
+            if (booking.CustomerId > 0)
+            {
+                booking.Customer = _context.Customers.FirstOrDefault(c => c.CustId == booking.CustomerId);
+            }
+            
+            // Try lookup by Email if still null (case-insensitive and trimmed)
+            if (booking.Customer == null && !string.IsNullOrEmpty(booking.EmailId))
+            {
+                string email = booking.EmailId.Trim().ToLower();
+                booking.Customer = _context.Customers.FirstOrDefault(c => c.Email != null && c.Email.Trim().ToLower() == email);
+            }
+
+            // Still null? Try search by name (case-insensitive and trimmed)
+            if (booking.Customer == null && !string.IsNullOrEmpty(booking.FirstName) && !string.IsNullOrEmpty(booking.LastName))
+            {
+                string fName = booking.FirstName.Trim().ToLower();
+                string lName = booking.LastName.Trim().ToLower();
+                booking.Customer = _context.Customers.FirstOrDefault(c => 
+                    c.FirstName != null && c.FirstName.Trim().ToLower() == fName && 
+                    c.LastName != null && c.LastName.Trim().ToLower() == lName);
+            }
+        }
+
         // Must fetch details for addons if not already loaded (lazy loading or explicit load)
         // Since we passed entity, EF Core context might be tracking.
         // Safer to query details.
@@ -426,16 +476,13 @@ public class BookingService : IBookingService
             SelectedAddOns = details.Where(d => d.AddOn != null).Select(d => d.AddOn.AddOnName).ToList(),
             AddOnDetails = addOnDetails,
             
-            // Populate Customer Details
-            MobileNumber = booking.Customer != null ? booking.Customer.MobileNumber : "",
-            DrivingLicenseNumber = booking.Customer != null ? booking.Customer.DrivingLicenseNumber : "",
-            AddressLine1 = booking.Customer != null ? booking.Customer.AddressLine1 : "",
-            City = booking.Customer != null ? booking.Customer.City : "",
-            State = booking.State, // Booking stores state? or use customer state? Using Booking.State for now as it was mapped earlier. 
-            // Better to use Customer.City if Booking.State was actually City. Checking earlier code: 
-            // "State = customer.City ?? "NA"," in CreateBooking. 
-            // Let's rely on Customer object for these details to be accurate.
-            Pincode = booking.Customer != null ? booking.Customer.Pincode : ""
+            // Populate Customer Details with fallbacks
+            MobileNumber = (booking.Customer != null ? (booking.Customer.MobileNumber ?? booking.Customer.PhoneNumber) : "") ?? "",
+            DrivingLicenseNumber = (booking.Customer != null ? booking.Customer.DrivingLicenseNumber : "") ?? "",
+            AddressLine1 = (booking.Customer != null ? booking.Customer.AddressLine1 : booking.Address) ?? "NA",
+            City = (booking.Customer != null ? booking.Customer.City : booking.State) ?? "NA", 
+            State = booking.State ?? "NA",
+            Pincode = (booking.Customer != null ? booking.Customer.Pincode : booking.Pin) ?? "NA"
         };
     }
 }

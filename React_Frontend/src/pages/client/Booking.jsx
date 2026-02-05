@@ -20,6 +20,7 @@ import {
     Loader2
 } from "lucide-react";
 import { formatDateForInput } from "@/lib/utils";
+import Swal from 'sweetalert2';
 
 const Booking = () => {
     const navigate = useNavigate();
@@ -274,7 +275,7 @@ const Booking = () => {
 
     const validateSearch = () => {
         if (!dates.startDate || !dates.endDate) {
-            alert("Please select both Pickup and Return dates.");
+            Swal.fire('Incomplete Dates', "Please select both Pickup and Return dates.", 'warning');
             return false;
         }
 
@@ -284,12 +285,12 @@ const Booking = () => {
         const end = new Date(dates.endDate);
 
         if (start < today) {
-            alert("Pickup date cannot be in the past.");
+            Swal.fire('Invalid Date', "Pickup date cannot be in the past.", 'warning');
             return false;
         }
 
         if (end <= start) {
-            alert("Return date must be after the pickup date.");
+            Swal.fire('Invalid Duration', "Return date must be after the pickup date.", 'warning');
             return false;
         }
 
@@ -299,7 +300,7 @@ const Booking = () => {
     const searchByAirport = async () => {
         if (!validateSearch()) return;
         if (!airportCode) {
-            alert("Enter airport code");
+            Swal.fire('Input Required', "Enter airport code", 'info');
             return;
         }
         setLoading(true);
@@ -315,7 +316,7 @@ const Booking = () => {
                 }
             });
         } catch (err) {
-            alert('Airport search failed');
+            Swal.fire('Error', 'Airport search failed', 'error');
         } finally {
             setLoading(false);
         }
@@ -325,7 +326,7 @@ const Booking = () => {
         e.preventDefault();
         if (!validateSearch()) return;
         if (!selectedState || (!selectedCity && cities.length > 0)) {
-            alert('Please select state and city');
+            Swal.fire('Selection Missing', 'Please select state and city', 'warning');
             return;
         }
 
@@ -336,7 +337,9 @@ const Booking = () => {
                 differentReturn,
                 locationData: {
                     stateName: selectedState.name,
-                    cityName: selectedCity.name
+                    cityName: selectedCity.name,
+                    stateId: selectedState.id,
+                    cityId: selectedCity.id
                 },
                 searchType: 'city'
             }
@@ -387,11 +390,11 @@ const Booking = () => {
             setStep(4);
         } catch (err) {
             console.error(err);
-            alert('Error saving customer info: ' + (err.response?.data?.message || err.message));
+            Swal.fire('Save Failed', 'Error saving customer info: ' + (err.response?.data?.message || err.message), 'error');
             if (err.response && err.response.data && err.response.data.errors) {
                 console.error("Validation Errors:", err.response.data.errors);
                 const errorMsg = Object.entries(err.response.data.errors).map(([key, val]) => `${key}: ${val.join(', ')}`).join('\n');
-                alert("Validation Failed:\n" + errorMsg);
+                Swal.fire('Validation Failed', errorMsg, 'error');
             }
 
         } finally {
@@ -402,7 +405,7 @@ const Booking = () => {
     const handleConfirmBooking = async () => {
         // Customer is already saved/retrieved in step 3
         if (!customer.custId) {
-            alert("Customer ID missing. Please save customer details first.");
+            Swal.fire('Missing Information', "Customer ID missing. Please save customer details first.", 'warning');
             return;
         }
 
@@ -427,7 +430,8 @@ const Booking = () => {
             startDate: dates.startDate,
             endDate: dates.endDate,
             addOnIds: addOnIdsToSubmit,
-            email: customer.email
+            email: customer.email,
+            carTypeId: selectedCar.carType?.carTypeId
         };
 
         try {
@@ -436,10 +440,15 @@ const Booking = () => {
             existing.push({ ...response, carName: selectedCar.carModel });
             localStorage.setItem('myBookings', JSON.stringify(existing));
 
-            alert('Booking Confirmed! Booking ID: ' + response.bookingId);
+            Swal.fire({
+                title: 'Booking Confirmed!',
+                text: 'Booking ID: ' + response.bookingId,
+                icon: 'success',
+                confirmButtonText: 'Great!'
+            });
             navigate('/');
         } catch (err) {
-            alert('Booking Failed: ' + (err.response?.data?.message || err.message));
+            Swal.fire('Booking Failed', (err.response?.data?.message || err.message), 'error');
         }
     };
 
@@ -726,7 +735,8 @@ const Booking = () => {
                                             onChange={e => setCustomer(prev => ({ ...prev, email: e.target.value }))}
                                             required
                                             readOnly={!!currentUser}
-                                            className="h-12 bg-muted/30"
+                                            className={`h-12 ${currentUser ? 'bg-muted/30 cursor-not-allowed' : 'bg-background'}`}
+                                            placeholder={currentUser ? "" : "Enter your email"}
                                         />
                                         {errors.email && <p className="text-xs text-destructive">{errors.email}</p>}
                                     </div>

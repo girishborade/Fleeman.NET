@@ -20,8 +20,10 @@ const Login = () => {
         setError('');
         setLoading(true);
         try {
-            await AuthService.login(username, password);
-            navigate('/');
+            const user = await AuthService.login(username, password);
+            if (user?.role === 'ADMIN') navigate('/admin/dashboard');
+            else if (user?.role === 'STAFF') navigate('/staff/dashboard');
+            else navigate('/');
             window.location.reload();
         } catch (err) {
             let errorMessage = 'Invalid credentials. Please try again.';

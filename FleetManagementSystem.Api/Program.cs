@@ -35,6 +35,10 @@ builder.Services.AddScoped<FleetManagementSystem.Api.Services.IGetCarDetailsFrom
 builder.Services.AddScoped<FleetManagementSystem.Api.Services.ILocaleService, FleetManagementSystem.Api.Services.LocaleService>();
 
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+if (string.IsNullOrEmpty(connectionString))
+{
+    throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
+}
 builder.Services.AddDbContext<FleetManagementSystem.Api.Data.ApplicationDbContext>(options =>
     options.UseMySql(connectionString, new MySqlServerVersion(new Version(8, 0, 23))));
 

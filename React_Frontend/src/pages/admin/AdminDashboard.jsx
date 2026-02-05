@@ -26,6 +26,7 @@ import {
     Search,
     Loader2
 } from "lucide-react";
+import Swal from 'sweetalert2';
 
 const AdminDashboard = () => {
     const navigate = useNavigate();
@@ -126,9 +127,9 @@ const AdminDashboard = () => {
     const handleTestConnection = async (id) => {
         try {
             const res = await ApiService.testVendorConnection(id);
-            alert(res.message);
+            Swal.fire('Connection Success', res.message, 'success');
         } catch (e) {
-            alert('Connection Failed: ' + (e.response?.data?.message || e.message));
+            Swal.fire('Connection Failed', (e.response?.data?.message || e.message), 'error');
         }
     };
 
@@ -289,104 +290,7 @@ const AdminDashboard = () => {
                     </Card>
                 </div>
 
-                {/* VENDOR MANAGEMENT */}
-                <Card className="border-none shadow-2xl bg-card overflow-hidden">
-                    <CardHeader className="p-8 bg-muted/50 border-bottom border-border/50 flex flex-row items-center justify-between">
-                        <div>
-                            <CardTitle className="text-2xl font-black uppercase tracking-tight">Ecosystem Integrations</CardTitle>
-                            <CardDescription className="font-medium">External REST API connections for utility services.</CardDescription>
-                        </div>
-                        <Button
-                            variant={showVendorForm ? "destructive" : "default"}
-                            onClick={() => setShowVendorForm(!showVendorForm)}
-                            className="rounded-xl h-10 px-6 font-black uppercase text-[10px] tracking-widest gap-2"
-                        >
-                            {showVendorForm ? <><X className="h-3.5 w-3.5" /> Cancel</> : <><Plus className="h-3.5 w-3.5" /> Register API</>}
-                        </Button>
-                    </CardHeader>
-                    <CardContent className="p-0">
-                        {showVendorForm && (
-                            <div className="p-8 bg-muted/20 border-b border-border/50 animate-in slide-in-from-top-4 duration-500">
-                                <div className="grid grid-cols-1 md:grid-cols-4 gap-6 items-end">
-                                    <div className="space-y-2">
-                                        <Label className="text-[10px] font-black uppercase text-muted-foreground">Provider Identity</Label>
-                                        <Input className="h-12 bg-background border-none rounded-xl font-bold" placeholder="Vendor Name" value={newVendor.name} onChange={e => setNewVendor({ ...newVendor, name: e.target.value })} />
-                                    </div>
-                                    <div className="space-y-2">
-                                        <Label className="text-[10px] font-black uppercase text-muted-foreground">Operational Category</Label>
-                                        <select className="flex h-12 w-full rounded-xl bg-background px-4 py-2 text-sm font-bold border-none focus-visible:ring-2 focus-visible:ring-primary" value={newVendor.type} onChange={e => setNewVendor({ ...newVendor, type: e.target.value })}>
-                                            <option>Maintenance</option>
-                                            <option>Cleaning</option>
-                                            <option>Parts Supplier</option>
-                                        </select>
-                                    </div>
-                                    <div className="space-y-2 lg:col-span-1">
-                                        <Label className="text-[10px] font-black uppercase text-muted-foreground">REST Endpoint URL</Label>
-                                        <Input className="h-12 bg-background border-none rounded-xl font-medium font-mono text-xs" placeholder="https://api..." value={newVendor.apiUrl} onChange={e => setNewVendor({ ...newVendor, apiUrl: e.target.value })} />
-                                    </div>
-                                    <Button className="h-12 rounded-xl font-black uppercase text-[10px] tracking-widest shadow-lg shadow-primary/20" onClick={handleAddVendor}>
-                                        Save Configuration
-                                    </Button>
-                                </div>
-                            </div>
-                        )}
 
-                        <div className="overflow-x-auto">
-                            <table className="w-full text-left border-collapse">
-                                <thead className="bg-muted/50">
-                                    <tr className="text-[10px] font-black uppercase tracking-widest text-muted-foreground border-b border-border/50">
-                                        <th className="px-8 py-5">Connection Base</th>
-                                        <th className="px-6 py-5">Service Protocol</th>
-                                        <th className="px-6 py-5">Routing Address</th>
-                                        <th className="px-8 py-5 text-right">Utility</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {vendors.map((v, index) => (
-                                        <tr key={v.vendorId} className="group hover:bg-muted/20 transition-colors border-b border-border/50">
-                                            <td className="px-8 py-6">
-                                                <div className="flex items-center gap-4">
-                                                    <div className="h-10 w-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-primary-foreground transition-all duration-300">
-                                                        <Activity className="h-5 w-5" />
-                                                    </div>
-                                                    <div>
-                                                        <p className="font-black text-sm uppercase">{v.name}</p>
-                                                        <p className="text-[10px] text-muted-foreground font-bold italic tracking-wider">SECURE LINK</p>
-                                                    </div>
-                                                </div>
-                                            </td>
-                                            <td className="px-6 py-6">
-                                                <Badge variant="secondary" className="bg-primary/5 text-primary border-primary/10 font-black text-[10px] uppercase px-3 py-1">
-                                                    {v.type}
-                                                </Badge>
-                                            </td>
-                                            <td className="px-6 py-6 font-mono text-xs text-muted-foreground">
-                                                {v.apiUrl || 'internal-dispatch://v1'}
-                                            </td>
-                                            <td className="px-8 py-6 text-right">
-                                                <Button
-                                                    variant="outline"
-                                                    size="sm"
-                                                    onClick={() => handleTestConnection(v.vendorId)}
-                                                    className="rounded-xl font-black uppercase text-[10px] tracking-widest h-10 px-5 border-primary/20 hover:bg-primary hover:text-white transition-all"
-                                                >
-                                                    Diagnostic Ping
-                                                </Button>
-                                            </td>
-                                        </tr>
-                                    ))}
-                                    {vendors.length === 0 && (
-                                        <tr>
-                                            <td colSpan="4" className="px-8 py-16 text-center text-muted-foreground font-medium italic">
-                                                No secondary ecosystem nodes registered.
-                                            </td>
-                                        </tr>
-                                    )}
-                                </tbody>
-                            </table>
-                        </div>
-                    </CardContent>
-                </Card>
 
                 {/* FLEET OVERVIEW */}
                 {fleetData && (

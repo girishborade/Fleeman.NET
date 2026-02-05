@@ -82,25 +82,25 @@ function App() {
               <Route path="/register" element={<Register />} />
               <Route path="/customer-care" element={<CustomerCare />} />
               <Route path="/explore-vehicles" element={<ExploreVehicles />} />
+              <Route path="/booking" element={<Booking />} />
+              <Route path="/select-car" element={<CarSelection />} />
+              <Route path="/select-hub" element={<HubSelection />} />
 
               {/* Client Protected Routes */}
-              <Route element={<ProtectedRoute allowedRoles={['ROLE_USER', 'ROLE_ADMIN', 'ROLE_STAFF']} />}>
-                <Route path="/booking" element={<Booking />} />
+              <Route element={<ProtectedRoute allowedRoles={['CUSTOMER', 'ADMIN', 'STAFF']} />}>
                 <Route path="/manage-booking" element={<ManageBooking />} />
                 <Route path="/my-bookings" element={<MyBookings />} />
-                <Route path="/select-car" element={<CarSelection />} />
-                <Route path="/select-hub" element={<HubSelection />} />
               </Route>
 
               {/* Staff Protected Routes */}
-              <Route element={<ProtectedRoute allowedRoles={['ROLE_STAFF', 'ROLE_ADMIN']} />}>
+              <Route element={<ProtectedRoute allowedRoles={['STAFF', 'ADMIN']} />}>
                 <Route path="/staff/dashboard" element={<StaffDashboard />} />
                 <Route path="/staff/handover" element={<StaffDashboard />} />
                 <Route path="/staff/return" element={<StaffDashboard />} />
               </Route>
 
               {/* Admin Protected Routes */}
-              <Route element={<ProtectedRoute allowedRoles={['ROLE_ADMIN']} />}>
+              <Route element={<ProtectedRoute allowedRoles={['ADMIN']} />}>
                 <Route path="/admin/dashboard" element={<AdminDashboard />} />
                 <Route path="/admin/bookings" element={<AdminBookings />} />
                 <Route path="/admin/staff" element={<StaffManagement />} />
@@ -110,7 +110,7 @@ function App() {
         </main>
         <Footer />
       </div>
-    </Router>
+    </Router >
   );
 }
 

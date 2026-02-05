@@ -27,6 +27,7 @@ import {
     X,
     AlertCircle
 } from "lucide-react";
+import Swal from 'sweetalert2';
 
 const StaffBookingWizard = ({ onClose }) => {
     const [step, setStep] = useState(1);
@@ -148,7 +149,12 @@ const StaffBookingWizard = ({ onClose }) => {
                 bookingId: booking.bookingId, carId: selectedCar.carId, fuelStatus: 'Full', notes: 'Instant Reservation - Automated Handover'
             });
 
-            alert(`Reservation Successful! Confirmation: ${booking.confirmationNumber}`);
+            Swal.fire({
+                title: 'Reservation Successful!',
+                text: `Confirmation: ${booking.confirmationNumber}`,
+                icon: 'success',
+                confirmButtonText: 'Perfect'
+            });
             onClose();
         } catch (err) {
             setMessage('Booking Failed: ' + (err.response?.data?.message || err.message));
@@ -216,8 +222,8 @@ const StaffBookingWizard = ({ onClose }) => {
                                     key={car.carId}
                                     onClick={() => setSelectedCar(car)}
                                     className={`p-5 rounded-2xl border-2 transition-all cursor-pointer flex justify-between items-center group ${selectedCar?.carId === car.carId
-                                            ? 'border-primary bg-primary/5 shadow-lg shadow-primary/10'
-                                            : 'border-border/50 bg-muted/20 hover:border-primary/30'
+                                        ? 'border-primary bg-primary/5 shadow-lg shadow-primary/10'
+                                        : 'border-border/50 bg-muted/20 hover:border-primary/30'
                                         }`}
                                 >
                                     <div className="flex items-center gap-4">

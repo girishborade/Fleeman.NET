@@ -20,7 +20,10 @@ instance.interceptors.request.use(
 
 const ApiService = {
     // Hubs
-    getHubs: () => instance.get('/api/v1/hubs').then(res => res.data),
+    getHubs: (stateName, cityName, cityId) => {
+        if (cityId) return instance.get(`/api/v1/hubs/city/${cityId}`).then(res => res.data);
+        return instance.get('/api/v1/hubs').then(res => res.data);
+    },
     searchLocations: (query) => instance.get(`/api/v1/locations/search?query=${query}`).then(res => res.data), // Feature missing in BE
 
     // States & Cities

@@ -193,7 +193,6 @@ CREATE TABLE user (
     hub_id INT,
     reset_token VARCHAR(255),
     reset_token_expiry DATETIME(6),
-    is_approved BIT(1) NOT NULL,
     FOREIGN KEY (hub_id) REFERENCES hub_master(hub_id)
 );
 

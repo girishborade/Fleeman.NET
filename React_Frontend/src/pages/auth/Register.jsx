@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { AlertTriangle, Loader2 } from "lucide-react";
+import Swal from 'sweetalert2';
 
 const Register = () => {
     const [formData, setFormData] = useState({
@@ -202,7 +203,7 @@ const Register = () => {
                                     className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary"
                                 />
                                 <Label htmlFor="terms" className="text-sm font-normal text-muted-foreground">
-                                    I agree to the <button type="button" className="text-primary hover:underline font-medium p-0 h-auto" onClick={() => alert('Terms & Conditions feature coming soon')}>Terms & Conditions</button>
+                                    I agree to the <button type="button" className="text-primary hover:underline font-medium p-0 h-auto" onClick={() => Swal.fire('Coming Soon', 'Terms & Conditions feature coming soon', 'info')}>Terms & Conditions</button>
                                 </Label>
                             </div>
 

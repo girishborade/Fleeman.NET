@@ -27,7 +27,7 @@ public class CarController : ControllerBase
         string message = "";
         try
         {
-            _excelUploadService.Save(file);
+            _excelUploadService.SaveCars(file);
             message = "Uploaded the file successfully: " + file.FileName;
             return Ok(new MessageResponse(message));
         }

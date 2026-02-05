@@ -20,9 +20,6 @@ public class User
     [Column("email")]
     public string? Email { get; set; }
 
-    [Column("is_approved")]
-    public bool IsApproved { get; set; } = true; // Default to approved for staff
-
     [Column("role")]
     public string? Role { get; set; } // Storing enum as string. Ideally use Enum datatype with conversion.
 

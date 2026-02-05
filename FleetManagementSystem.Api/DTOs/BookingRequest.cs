@@ -13,4 +13,5 @@ public class BookingRequest
     public DateTime EndDate { get; set; }
     public List<int> AddOnIds { get; set; }
     public string? Email { get; set; }
+    public long? CarTypeId { get; set; }
 }

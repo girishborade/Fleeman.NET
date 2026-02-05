@@ -21,6 +21,7 @@ import {
     ShieldCheck,
     Loader2
 } from "lucide-react";
+import Swal from 'sweetalert2';
 
 const ManageBooking = () => {
     const location = useLocation();
@@ -83,7 +84,17 @@ const ManageBooking = () => {
     };
 
     const handleCancel = async () => {
-        if (!window.confirm('Are you sure you want to cancel this reservation? This action cannot be undone.')) {
+        const result = await Swal.fire({
+            title: 'Cancel Reservation?',
+            text: 'Are you sure you want to cancel this reservation? This action cannot be undone.',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#3085d6',
+            confirmButtonText: 'Yes, cancel it!'
+        });
+
+        if (!result.isConfirmed) {
             return;
         }
 
@@ -92,7 +103,7 @@ const ManageBooking = () => {
         try {
             const updatedBooking = await ApiService.cancelBooking(booking.bookingId);
             setBooking(updatedBooking);
-            alert('Your reservation has been successfully cancelled.');
+            Swal.fire('Cancelled!', 'Your reservation has been successfully cancelled.', 'success');
         } catch (err) {
             console.error('Cancellation failed:', err);
             setError('Failed to cancel the booking. Please contact support.');

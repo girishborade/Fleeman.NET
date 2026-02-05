@@ -27,6 +27,7 @@ import {
     Hash,
     MapPin
 } from "lucide-react";
+import Swal from 'sweetalert2';
 
 const StaffDashboard = () => {
     const [activeTab, setActiveTab] = useState('handover');
@@ -147,7 +148,7 @@ const StaffDashboard = () => {
             setShowCarSelection(true);
         } catch (err) {
             console.error(err);
-            alert("Could not load available cars. Defaulting to current car.");
+            Swal.fire('Load Failed', "Could not load available cars. Defaulting to current car.", 'warning');
         } finally {
             setLoading(false);
         }

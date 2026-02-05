@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using FleetManagementSystem.Api.Data;
 using FleetManagementSystem.Api.Models;
 using FleetManagementSystem.Api.DTOs;
+using FleetManagementSystem.Api.Services;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -14,10 +15,12 @@ namespace FleetManagementSystem.Api.Controllers;
 public class AdminController : ControllerBase
 {
     private readonly ApplicationDbContext _context;
+    private readonly IExcelUploadService _excelUploadService;
 
-    public AdminController(ApplicationDbContext context)
+    public AdminController(ApplicationDbContext context, IExcelUploadService excelUploadService)
     {
         _context = context;
+        _excelUploadService = excelUploadService;
     }
 
     // GET: api/admin/staff
@@ -48,6 +51,21 @@ public class AdminController : ControllerBase
             .ToListAsync();
 
         return Ok(staffMembers);
+    }
+
+    // POST: api/admin/upload-rates
+    [HttpPost("upload-rates")]
+    public IActionResult UploadRates(IFormFile file)
+    {
+        try
+        {
+            _excelUploadService.SaveRates(file);
+            return Ok(new MessageResponse("Rates uploaded successfully: " + file.FileName));
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, new MessageResponse("Failed to upload rates: " + ex.Message));
+        }
     }
 
     // POST: api/admin/register-staff

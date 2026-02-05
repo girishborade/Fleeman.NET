@@ -35,11 +35,17 @@ public class ExceptionMiddleware
         context.Response.ContentType = "application/json";
         context.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
 
+        var details = _env.IsDevelopment() ? ex.Message : "An unexpected error occurred. Please contact support.";
+        if (_env.IsDevelopment() && ex.InnerException != null)
+        {
+            details += " | Inner Exception: " + ex.InnerException.Message;
+        }
+
         var response = new ErrorResponse
         {
             StatusCode = context.Response.StatusCode,
             Message = "Internal Server Error",
-            Details = _env.IsDevelopment() ? ex.Message : "An unexpected error occurred. Please contact support."
+            Details = details
         };
 
         var json = JsonSerializer.Serialize(response, new JsonSerializerOptions{ PropertyNamingPolicy = JsonNamingPolicy.CamelCase });

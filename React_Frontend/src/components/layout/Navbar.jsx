@@ -38,13 +38,11 @@ const Navbar = ({ theme, toggleTheme }) => {
     const NavItems = ({ mobile = false }) => (
         <>
             {[
-                { label: 'Home', path: '/' },
-                { label: 'About Us', path: '/about' },
+                { label: 'Home', path: '/', condition: !['ADMIN', 'STAFF'].includes(role) },
+                { label: 'About Us', path: '/about', condition: !['ADMIN', 'STAFF'].includes(role) },
                 { label: 'Book a Car', path: '/booking', condition: !user || role === 'CUSTOMER' },
                 { label: 'My Bookings', path: '/my-bookings', condition: role === 'CUSTOMER' },
-                { label: 'Dashboard', path: '/staff/dashboard', condition: role === 'STAFF' },
-                { label: 'Admin Panel', path: '/admin/dashboard', condition: role === 'ADMIN' },
-                { label: 'Support', path: '/customer-care' }
+                { label: 'Support', path: '/customer-care', condition: !['ADMIN', 'STAFF'].includes(role) }
             ].map((item, idx) => (
                 (item.condition === undefined || item.condition) && (
                     <Link
@@ -63,8 +61,8 @@ const Navbar = ({ theme, toggleTheme }) => {
 
     return (
         <header className={`sticky top-0 z-50 w-full transition-all duration-300 ${scrolled ? 'glass shadow-lg py-2' : 'bg-transparent py-4'}`}>
-            <div className="container mx-auto px-4 flex items-center justify-between">
-                <Link className="flex items-center gap-2 font-bold text-2xl group" to="/">
+            <div className={`container mx-auto px-4 flex items-center ${['ADMIN', 'STAFF'].includes(role) ? 'justify-between' : 'justify-between'}`}>
+                <Link className="flex items-center gap-2 font-bold text-2xl group" to={role === 'ADMIN' ? '/admin/dashboard' : role === 'STAFF' ? '/staff/dashboard' : '/'}>
                     <div className="relative">
                         <div className="absolute inset-0 bg-primary/20 rounded-full blur-xl group-hover:bg-primary/40 transition-all duration-500" />
                         <Shield className="h-8 w-8 text-primary relative z-10 transition-transform duration-500 group-hover:rotate-12" />

@@ -37,7 +37,7 @@ const HubSelection = () => {
                 if (searchType === 'airport') {
                     data = locationData;
                 } else if (searchType === 'city') {
-                    data = await ApiService.getHubs(locationData.stateName, locationData.cityName);
+                    data = await ApiService.getHubs(locationData.stateName, locationData.cityName, locationData.cityId);
                 }
                 setHubs(data);
             } catch (err) {
