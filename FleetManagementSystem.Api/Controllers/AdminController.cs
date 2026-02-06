@@ -8,8 +8,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
+using Microsoft.AspNetCore.Authorization;
+
 namespace FleetManagementSystem.Api.Controllers;
 
+[Authorize(Roles = "ADMIN")]
 [ApiController]
 [Route("api/admin")]
 public class AdminController : ControllerBase
@@ -132,7 +135,7 @@ public class AdminController : ControllerBase
 
     // GET: api/admin/fleet-overview
     [HttpGet("fleet-overview")]
-    public async Task<ActionResult<FleetOverviewResponse>> GetFleetOverview()
+    public async Task<ActionResult<FleetOverviewResponse>> GetFleetOverview([FromQuery] DateTime? startDate, [FromQuery] DateTime? endDate)
     {
         // Get all cars with hub and booking information
         var cars = await _context.Cars
@@ -141,11 +144,28 @@ public class AdminController : ControllerBase
             .Include(c => c.CarType)
             .ToListAsync();
 
-        // Get all active bookings
-        var activeBookings = await _context.Bookings
+        // Get bookings relevant to the period
+        // If dates provided: check for overlap (Start <= EndRequested AND End >= StartRequested)
+        // If no dates: check for active/ongoing (Status == "ACTIVE")
+        var bookingsQuery = _context.Bookings
             .Include(b => b.Customer)
-            .Where(b => b.BookingStatus == "ACTIVE")
-            .ToListAsync();
+            .AsQueryable();
+
+        if (startDate.HasValue && endDate.HasValue)
+        {
+            // Filter by overlap
+            // We want CONFIRMED or ACTIVE bookings covering this period
+            bookingsQuery = bookingsQuery.Where(b => 
+                (b.BookingStatus == "ACTIVE" || b.BookingStatus == "CONFIRMED") && 
+                b.StartDate <= endDate.Value && b.EndDate >= startDate.Value);
+        }
+        else
+        {
+            // Default behavior: Current Status (Snapshot of now)
+            bookingsQuery = bookingsQuery.Where(b => b.BookingStatus == "ACTIVE");
+        }
+
+        var relevantBookings = await bookingsQuery.ToListAsync();
 
         // Group cars by hub
         var hubGroups = cars.GroupBy(c => c.HubId);
@@ -160,27 +180,41 @@ public class AdminController : ControllerBase
 
             foreach (var car in hubCars)
             {
-                // Determine car status
+                // Determine car status based on relevant bookings
                 string status;
                 RentalInfo? rentalInfo = null;
 
-                var activeBooking = activeBookings.FirstOrDefault(b => b.CarId == car.CarId);
+                var booking = relevantBookings.FirstOrDefault(b => b.CarId == car.CarId);
 
-                if (activeBooking != null)
+                if (booking != null)
                 {
-                    status = "Rented";
+                    status = "Rented"; // Or "Booked" for future, but keeping "Rented" for UI consistency
                     rentalInfo = new RentalInfo
                     {
-                        BookingId = activeBooking.BookingId,
-                        CustomerName = $"{activeBooking.Customer?.FirstName} {activeBooking.Customer?.LastName}".Trim(),
-                        StartDate = activeBooking.StartDate,
-                        EndDate = activeBooking.EndDate,
-                        PickupTime = activeBooking.PickupTime
+                        BookingId = booking.BookingId,
+                        CustomerName = $"{booking.Customer?.FirstName} {booking.Customer?.LastName}".Trim(),
+                        StartDate = booking.StartDate,
+                        EndDate = booking.EndDate,
+                        PickupTime = booking.PickupTime
                     };
                 }
                 else if (car.IsAvailable == "N" || car.IsAvailable == "NO" || car.IsAvailable == "False" || car.IsAvailable == "0")
                 {
-                    status = "Maintenance";
+                     // If searching future dates, maintenance status 'might' not apply unless we track maintenance schedule. 
+                     // For now, if no booking found, trust current availability flag ONLY if looking at "now" (no dates)
+                     // If looking at future, we assume available unless booked. 
+                     // HOWEVER, keeping it simple: If availability flag is strict, mark maintenance.
+                     // But strictly speaking, for future query, we only care about bookings.
+                     
+                     if (!startDate.HasValue) 
+                     {
+                        status = "Maintenance";
+                     }
+                     else 
+                     {
+                         // For date range, if not booked, it's available (ignoring current flag which might be momentary)
+                         status = "Available";
+                     }
                 }
                 else
                 {

@@ -3,17 +3,22 @@ using System.Collections.Generic;
 using FleetManagementSystem.Api.DTOs;
 using FleetManagementSystem.Api.Services;
 
+using Microsoft.AspNetCore.Authorization;
+
 namespace FleetManagementSystem.Api.Controllers;
 
+[Authorize]
 [ApiController]
 [Route("booking")]
 public class BookingController : ControllerBase
 {
     private readonly IBookingService _bookingService;
+    private readonly IEmailService _emailService;
 
-    public BookingController(IBookingService bookingService)
+    public BookingController(IBookingService bookingService, IEmailService emailService)
     {
         _bookingService = bookingService;
+        _emailService = emailService;
     }
 
     // Moved GetBooking to the bottom to avoid potential route conflicts with literal paths like "return", "all", etc.
@@ -44,7 +49,23 @@ public class BookingController : ControllerBase
     {
         try
         {
-            return Ok(_bookingService.CreateBooking(request));
+            var booking = _bookingService.CreateBooking(request);
+
+            // Send Confirmation Email
+            try
+            {
+                if (!string.IsNullOrEmpty(request.Email))
+                {
+                    _emailService.SendBookingConfirmationEmail(request.Email, booking);
+                }
+            }
+            catch (Exception ex)
+            {
+                // Log email error but don't fail the booking
+                Console.WriteLine($"Failed to send confirmation email: {ex.Message}");
+            }
+
+            return Ok(booking);
         }
         catch (Exception ex)
         {

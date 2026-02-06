@@ -87,12 +87,12 @@ const Home = () => {
                         <div className="flex flex-wrap justify-center gap-4 pt-4">
                             <Link to="/booking">
                                 <Button size="lg" className="rounded-none h-14 px-8 text-lg bg-primary hover:bg-primary/90 text-black font-bold tracking-wide">
-                                    BOOK NOW
+                                    {t('home.btnBookNow')}
                                 </Button>
                             </Link>
                             <Link to="/explore-vehicles">
                                 <Button variant="outline" size="lg" className="rounded-none h-14 px-8 text-lg border-2 border-primary/20 hover:bg-primary/5 hover:border-primary transition-colors">
-                                    EXPLORE VEHICLES
+                                    {t('home.btnExploreVehicles')}
                                 </Button>
                             </Link>
                         </div>

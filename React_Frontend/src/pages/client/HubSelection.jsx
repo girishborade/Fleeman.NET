@@ -23,7 +23,11 @@ const HubSelection = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
 
-    const { pickupDateTime, returnDateTime, locationData, searchType } = location.state || {};
+    // Different Return Logic States
+    const [selectionStep, setSelectionStep] = useState(1); // 1: Pickup, 2: Return
+    const [selectedPickupHub, setSelectedPickupHub] = useState(null);
+
+    const { pickupDateTime, returnDateTime, locationData, searchType, differentReturn } = location.state || {};
 
     useEffect(() => {
         if (!location.state) {
@@ -32,12 +36,21 @@ const HubSelection = () => {
         }
 
         const fetchHubs = async () => {
+            setLoading(true);
             try {
                 let data = [];
                 if (searchType === 'airport') {
+                    // For airport, we assume return to same airport for now unless complex logic added.
+                    // Or if differentReturn is true, we might need manual city selection for return? 
+                    // Current simplified flow: Airport search doesn't support different return in this iteration easily.
                     data = locationData;
                 } else if (searchType === 'city') {
-                    data = await ApiService.getHubs(locationData.stateName, locationData.cityName, locationData.cityId);
+                    if (selectionStep === 1) {
+                        data = await ApiService.getHubs(locationData.stateName, locationData.cityName, locationData.cityId);
+                    } else {
+                        // Return Hub Fetch
+                        data = await ApiService.getHubs(locationData.returnStateName, locationData.returnCityName, locationData.returnCityId);
+                    }
                 }
                 setHubs(data);
             } catch (err) {
@@ -49,16 +62,47 @@ const HubSelection = () => {
         };
 
         fetchHubs();
-    }, [location.state, navigate, searchType, locationData]);
+    }, [location.state, navigate, searchType, locationData, selectionStep]);
 
     const handleHubSelect = (hub) => {
-        navigate('/select-car', {
-            state: {
-                pickupHub: hub,
-                pickupDateTime,
-                returnDateTime
+        // Check if we need to select a return hub manually
+        // We need manual return selection IF differentReturn is true AND we don't have a preSelectedReturnHub
+        const needsManualReturnSelection = differentReturn && !locationData?.returnHub;
+
+        if (needsManualReturnSelection && selectionStep === 1) {
+            setSelectedPickupHub(hub);
+            setSelectionStep(2);
+            window.scrollTo(0, 0);
+        } else {
+            // Finalize logic
+            let finalPickupHub = (selectionStep === 2) ? selectedPickupHub : hub;
+            let finalReturnHub;
+
+            if (selectionStep === 2) {
+                finalReturnHub = hub;
+            } else if (differentReturn && locationData?.returnHub) {
+                finalReturnHub = locationData.returnHub;
+            } else {
+                finalReturnHub = finalPickupHub; // Same return
             }
-        });
+
+            navigate('/select-car', {
+                state: {
+                    pickupHub: finalPickupHub, // If step 1 (same return), hub is pickup. If step 2, selectedPickupHub is pickup.
+                    returnHub: finalReturnHub, // If step 2, hub is return.
+                    pickupDateTime,
+                    returnDateTime
+                }
+            });
+        }
+    };
+
+    const handleBack = () => {
+        if (selectionStep === 2) {
+            setSelectionStep(1);
+        } else {
+            navigate('/booking');
+        }
     };
 
     if (loading) return (
@@ -72,16 +116,17 @@ const HubSelection = () => {
         <div className="min-h-screen bg-background py-16">
             <div className="container mx-auto px-4">
                 <div className="max-w-4xl mx-auto text-center mb-16 animate-in fade-in slide-in-from-bottom-4 duration-700">
-                    <Link to="/booking">
-                        <Button variant="ghost" className="mb-6 gap-2 text-muted-foreground hover:text-foreground">
-                            <ArrowLeft className="h-4 w-4" /> Change Search Criteria
-                        </Button>
-                    </Link>
+                    <Button variant="ghost" onClick={handleBack} className="mb-6 gap-2 text-muted-foreground hover:text-foreground">
+                        <ArrowLeft className="h-4 w-4" /> {selectionStep === 1 ? 'Change Search Criteria' : 'Back to Pickup Hubs'}
+                    </Button>
                     <h1 className="text-4xl md:text-5xl font-black mb-4 tracking-tight">
-                        Select your <span className="text-primary italic">Departure Hub</span>
+                        Select your <span className="text-primary italic">{selectionStep === 1 ? 'Departure Hub' : 'Return Hub'}</span>
                     </h1>
                     <p className="text-xl text-muted-foreground">
-                        {searchType === 'airport' ? 'Direct terminal access for seamless arrivals.' : `Fleet centers identified in ${locationData?.cityName || 'your area'}.`}
+                        {selectionStep === 1
+                            ? (searchType === 'airport' ? 'Direct terminal access for seamless arrivals.' : `Fleet centers identified in ${locationData?.cityName || 'your area'}.`)
+                            : `Select a hub in ${locationData?.returnCityName} for vehicle return.`
+                        }
                     </p>
                 </div>
 

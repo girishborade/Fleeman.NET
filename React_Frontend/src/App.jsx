@@ -18,10 +18,12 @@ const HubSelection = lazy(() => import('./pages/client/HubSelection'));
 const StaffDashboard = lazy(() => import('./pages/staff/StaffDashboard'));
 const AdminDashboard = lazy(() => import('./pages/admin/AdminDashboard'));
 const AdminBookings = lazy(() => import('./pages/admin/AdminBookings'));
+const AdminVehicles = lazy(() => import('./pages/admin/AdminVehicles'));
 const StaffManagement = lazy(() => import('./pages/admin/StaffManagement'));
 const ManageBooking = lazy(() => import('./pages/client/ManageBooking'));
 const CustomerCare = lazy(() => import('./pages/client/CustomerCare'));
 const ExploreVehicles = lazy(() => import('./pages/client/ExploreVehicles'));
+
 
 // Import Protected Route
 import ProtectedRoute from './components/auth/ProtectedRoute';
@@ -103,8 +105,12 @@ function App() {
               <Route element={<ProtectedRoute allowedRoles={['ADMIN']} />}>
                 <Route path="/admin/dashboard" element={<AdminDashboard />} />
                 <Route path="/admin/bookings" element={<AdminBookings />} />
+                <Route path="/admin/vehicles" element={<AdminVehicles />} />
                 <Route path="/admin/staff" element={<StaffManagement />} />
               </Route>
+
+              {/* 404 Route */}
+
             </Routes>
           </Suspense>
         </main>

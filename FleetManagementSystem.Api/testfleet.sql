@@ -1,5 +1,5 @@
-CREATE DATABASE IF NOT EXISTS testfleet;
-USE testfleet;
+CREATE DATABASE IF NOT EXISTS fleet_mgm;
+USE fleet_mgm;
 
 -- ADD ON MASTER
 CREATE TABLE add_on_master (

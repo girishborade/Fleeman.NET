@@ -37,10 +37,7 @@ const AdminDashboard = () => {
     const [vendors, setVendors] = useState([]);
     const [newVendor, setNewVendor] = useState({ name: '', type: 'Maintenance', email: '', apiUrl: 'https://api.example.com/v1' });
     const [showVendorForm, setShowVendorForm] = useState(false);
-    const [fleetData, setFleetData] = useState(null);
-    const [expandedHubs, setExpandedHubs] = useState({});
-    const [searchTerm, setSearchTerm] = useState('');
-    const [statusFilter, setStatusFilter] = useState('All');
+
 
     // Auto-clear message after 5 seconds
     React.useEffect(() => {
@@ -54,7 +51,6 @@ const AdminDashboard = () => {
 
     React.useEffect(() => {
         loadVendors();
-        loadFleetOverview();
     }, []);
 
     const loadVendors = async () => {
@@ -66,40 +62,13 @@ const AdminDashboard = () => {
         }
     };
 
-    const loadFleetOverview = async () => {
-        try {
-            const data = await ApiService.getFleetOverview();
-            setFleetData(data);
-            // Expand all hubs by default
-            const expanded = {};
-            data.hubs.forEach(hub => { expanded[hub.hubId] = true; });
-            setExpandedHubs(expanded);
-        } catch (e) {
-            console.error('Failed to load fleet overview:', e);
-        }
-    };
 
-    const toggleHub = (hubId) => {
-        setExpandedHubs(prev => ({ ...prev, [hubId]: !prev[hubId] }));
-    };
 
-    const getFilteredCars = (cars) => {
-        return cars.filter(car => {
-            const matchesSearch = car.model.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                car.registrationNumber.toLowerCase().includes(searchTerm.toLowerCase());
-            const matchesStatus = statusFilter === 'All' || car.status === statusFilter;
-            return matchesSearch && matchesStatus;
-        });
-    };
 
-    const getStatusColor = (status) => {
-        switch (status) {
-            case 'Available': return 'bg-emerald-500/10 text-emerald-600 border-emerald-500/20';
-            case 'Rented': return 'bg-blue-500/10 text-blue-600 border-blue-500/20';
-            case 'Maintenance': return 'bg-amber-500/10 text-amber-600 border-amber-500/20';
-            default: return 'bg-gray-500/10 text-gray-600 border-gray-500/20';
-        }
-    };
+
+
+
+
 
     const handleRateUpload = async (e) => {
         e.preventDefault();
@@ -280,7 +249,7 @@ const AdminDashboard = () => {
                             <h3 className="text-xl font-black mb-2 uppercase">Vehicles</h3>
                             <p className="text-xs text-muted-foreground mb-8 leading-relaxed">Fleet status monitoring & vehicle availability tracking.</p>
                             <Button
-                                onClick={() => document.getElementById('fleet-overview')?.scrollIntoView({ behavior: 'smooth' })}
+                                onClick={() => navigate('/admin/vehicles')}
                                 variant="outline"
                                 className="w-full h-14 rounded-2xl font-black uppercase tracking-widest text-[10px] border-violet-500/20 hover:bg-violet-500 hover:text-white transition-all gap-2 mt-4"
                             >
@@ -292,158 +261,7 @@ const AdminDashboard = () => {
 
 
 
-                {/* FLEET OVERVIEW */}
-                {fleetData && (
-                    <Card id="fleet-overview" className="border-none shadow-2xl bg-card overflow-hidden mt-12">
-                        <CardHeader className="p-8 bg-muted/50 border-bottom border-border/50">
-                            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
-                                <div>
-                                    <CardTitle className="text-2xl font-black uppercase tracking-tight">Fleet Overview</CardTitle>
-                                    <CardDescription className="font-medium">Real-time vehicle status across all hubs</CardDescription>
-                                </div>
-                                <div className="flex flex-wrap gap-4">
-                                    <div className="bg-emerald-500/10 border border-emerald-500/20 px-4 py-2 rounded-xl">
-                                        <p className="text-[10px] font-black uppercase text-muted-foreground tracking-widest">Available</p>
-                                        <p className="text-2xl font-black text-emerald-600">{fleetData.statistics.totalAvailable}</p>
-                                    </div>
-                                    <div className="bg-blue-500/10 border border-blue-500/20 px-4 py-2 rounded-xl">
-                                        <p className="text-[10px] font-black uppercase text-muted-foreground tracking-widest">Rented</p>
-                                        <p className="text-2xl font-black text-blue-600">{fleetData.statistics.totalRented}</p>
-                                    </div>
-                                    <div className="bg-amber-500/10 border border-amber-500/20 px-4 py-2 rounded-xl">
-                                        <p className="text-[10px] font-black uppercase text-muted-foreground tracking-widest">Maintenance</p>
-                                        <p className="text-2xl font-black text-amber-600">{fleetData.statistics.totalMaintenance}</p>
-                                    </div>
-                                    <div className="bg-primary/10 border border-primary/20 px-4 py-2 rounded-xl">
-                                        <p className="text-[10px] font-black uppercase text-muted-foreground tracking-widest">Utilization</p>
-                                        <p className="text-2xl font-black text-primary">{fleetData.statistics.utilizationRate}%</p>
-                                    </div>
-                                </div>
-                            </div>
-                            <div className="flex flex-col md:flex-row gap-4 mt-6">
-                                <div className="flex-1">
-                                    <Input
-                                        type="text"
-                                        placeholder="Search by model or registration..."
-                                        value={searchTerm}
-                                        onChange={(e) => setSearchTerm(e.target.value)}
-                                        className="h-12 bg-background border-none rounded-xl font-medium text-sm"
-                                    />
-                                </div>
-                                <select
-                                    value={statusFilter}
-                                    onChange={(e) => setStatusFilter(e.target.value)}
-                                    className="flex h-12 w-full md:w-48 rounded-xl bg-background px-4 py-2 text-sm font-bold border-none focus-visible:ring-2 focus-visible:ring-primary"
-                                >
-                                    <option>All</option>
-                                    <option>Available</option>
-                                    <option>Rented</option>
-                                    <option>Maintenance</option>
-                                </select>
-                            </div>
-                        </CardHeader>
-                        <CardContent className="p-0">
-                            <div className="space-y-4 p-8">
-                                {fleetData.hubs.map((hub) => {
-                                    const filteredCars = getFilteredCars(hub.cars);
-                                    if (filteredCars.length === 0) return null;
 
-                                    return (
-                                        <Card key={hub.hubId} className="border-border/50 overflow-hidden">
-                                            <CardHeader
-                                                className="p-6 bg-muted/30 cursor-pointer hover:bg-muted/50 transition-colors"
-                                                onClick={() => toggleHub(hub.hubId)}
-                                            >
-                                                <div className="flex items-center justify-between">
-                                                    <div className="flex items-center gap-4">
-                                                        <div className="h-12 w-12 rounded-xl bg-primary/10 flex items-center justify-center text-primary">
-                                                            <Car className="h-6 w-6" />
-                                                        </div>
-                                                        <div>
-                                                            <h3 className="text-lg font-black uppercase">{hub.hubName}</h3>
-                                                            <p className="text-xs text-muted-foreground font-medium">{hub.cityName || 'Unknown City'}</p>
-                                                        </div>
-                                                    </div>
-                                                    <div className="flex items-center gap-6">
-                                                        <div className="flex gap-3">
-                                                            <Badge className="bg-emerald-500/10 text-emerald-600 border-emerald-500/20 font-black text-xs px-3 py-1">
-                                                                {hub.availableCars} Available
-                                                            </Badge>
-                                                            <Badge className="bg-blue-500/10 text-blue-600 border-blue-500/20 font-black text-xs px-3 py-1">
-                                                                {hub.rentedCars} Rented
-                                                            </Badge>
-                                                            <Badge className="bg-amber-500/10 text-amber-600 border-amber-500/20 font-black text-xs px-3 py-1">
-                                                                {hub.maintenanceCars} Maintenance
-                                                            </Badge>
-                                                        </div>
-                                                        <Button variant="ghost" size="icon" className="h-8 w-8">
-                                                            {expandedHubs[hub.hubId] ? '▼' : '▶'}
-                                                        </Button>
-                                                    </div>
-                                                </div>
-                                            </CardHeader>
-                                            {expandedHubs[hub.hubId] && (
-                                                <CardContent className="p-0">
-                                                    <div className="overflow-x-auto">
-                                                        <table className="w-full text-left border-collapse">
-                                                            <thead className="bg-muted/20">
-                                                                <tr className="text-[10px] font-black uppercase tracking-widest text-muted-foreground border-b border-border/50">
-                                                                    <th className="px-6 py-4">Vehicle</th>
-                                                                    <th className="px-6 py-4">Type</th>
-                                                                    <th className="px-6 py-4">Registration</th>
-                                                                    <th className="px-6 py-4">Status</th>
-                                                                    <th className="px-6 py-4">Daily Rate</th>
-                                                                    <th className="px-6 py-4">Current Rental</th>
-                                                                </tr>
-                                                            </thead>
-                                                            <tbody>
-                                                                {filteredCars.map((car) => (
-                                                                    <tr key={car.carId} className="group hover:bg-muted/20 transition-colors border-b border-border/50">
-                                                                        <td className="px-6 py-5">
-                                                                            <p className="font-black text-sm">{car.model}</p>
-                                                                        </td>
-                                                                        <td className="px-6 py-5">
-                                                                            <p className="text-xs text-muted-foreground font-medium">{car.carType || 'N/A'}</p>
-                                                                        </td>
-                                                                        <td className="px-6 py-5">
-                                                                            <p className="font-mono text-xs font-bold">{car.registrationNumber}</p>
-                                                                        </td>
-                                                                        <td className="px-6 py-5">
-                                                                            <Badge className={`${getStatusColor(car.status)} font-black text-xs px-3 py-1`}>
-                                                                                {car.status}
-                                                                            </Badge>
-                                                                        </td>
-                                                                        <td className="px-6 py-5">
-                                                                            <p className="font-black text-sm">
-                                                                                {car.dailyRate ? `₹${car.dailyRate.toLocaleString()}` : 'N/A'}
-                                                                            </p>
-                                                                        </td>
-                                                                        <td className="px-6 py-5">
-                                                                            {car.currentRental ? (
-                                                                                <div className="text-xs">
-                                                                                    <p className="font-bold">{car.currentRental.customerName}</p>
-                                                                                    <p className="text-muted-foreground">
-                                                                                        {new Date(car.currentRental.startDate).toLocaleDateString()} - {new Date(car.currentRental.endDate).toLocaleDateString()}
-                                                                                    </p>
-                                                                                </div>
-                                                                            ) : (
-                                                                                <p className="text-xs text-muted-foreground italic">—</p>
-                                                                            )}
-                                                                        </td>
-                                                                    </tr>
-                                                                ))}
-                                                            </tbody>
-                                                        </table>
-                                                    </div>
-                                                </CardContent>
-                                            )}
-                                        </Card>
-                                    );
-                                })}
-                            </div>
-                        </CardContent>
-                    </Card>
-                )}
             </div>
         </div>
     );

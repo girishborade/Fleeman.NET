@@ -1,5 +1,7 @@
 import axios from 'axios';
 
+import Swal from 'sweetalert2';
+
 const API_URL = 'http://localhost:5086';
 
 const instance = axios.create({
@@ -9,13 +11,64 @@ const instance = axios.create({
 // Add a request interceptor to append the token if present
 instance.interceptors.request.use(
     config => {
-        const user = JSON.parse(localStorage.getItem('user'));
+        const user = JSON.parse(sessionStorage.getItem('user'));
         if (user && user.token) {
             config.headers['Authorization'] = 'Bearer ' + user.token;
         }
         return config;
     },
     error => Promise.reject(error)
+);
+
+// Add a response interceptor to handle global errors
+instance.interceptors.response.use(
+    response => response,
+    error => {
+        // Allow requests to suppress global error handling
+        if (error.config && error.config.suppressGlobalErrors) {
+            return Promise.reject(error);
+        }
+
+        let title = 'Error';
+        let text = 'Something went wrong!';
+
+        if (error.response) {
+            const status = error.response.status;
+            const data = error.response.data;
+            // Extract message from backend response if available (Backend often sends string or {message: "..."})
+            const backendMessage = typeof data === 'string' ? data : (data?.message || data?.title || 'Unknown error');
+
+            if (status === 401) {
+                // Determine if it is a login failure or session expiry
+                // We rely on App.jsx for session expiry, but this catches immediate 401s
+                title = 'Unauthorized';
+                text = backendMessage || 'You need to login to access this resource.';
+            } else if (status === 403) {
+                title = 'Access Denied';
+                text = 'You do not have permission to perform this action.';
+            } else if (status === 404) {
+                title = 'Not Found';
+                text = 'The requested resource was not found.';
+            } else if (status >= 500) {
+                title = 'Server Error';
+                text = backendMessage || 'Our servers are facing issues. Please try again later.';
+            } else {
+                text = backendMessage;
+            }
+        } else if (error.request) {
+            title = 'Network Error';
+            text = 'Unable to connect to the server. Please check your internet connection.';
+        }
+
+        Swal.fire({
+            icon: 'error',
+            title: title,
+            text: text,
+            confirmButtonColor: '#d33'
+        });
+
+        return Promise.reject(error);
+    }
 );
 
 const ApiService = {
@@ -58,7 +111,7 @@ const ApiService = {
     cancelBooking: (id) => instance.post(`/booking/cancel/${id}`).then(res => res.data),
 
     // Customer
-    findCustomer: (email) => instance.get(`/api/v1/customers/${email}`).then(res => res.data),
+    findCustomer: (email) => instance.get(`/api/v1/customers/${email}`, { suppressGlobalErrors: true }).then(res => res.data),
     saveCustomer: (customer) => instance.post('/api/v1/customers', customer).then(res => res.data),
 
     // Vendors
@@ -77,7 +130,13 @@ const ApiService = {
 
     // Admin Dashboard
     getAllBookings: () => instance.get('/booking/all').then(res => res.data),
-    getFleetOverview: () => instance.get('/api/admin/fleet-overview').then(res => res.data),
+    getFleetOverview: (startDate, endDate) => {
+        let url = '/api/admin/fleet-overview';
+        if (startDate && endDate) {
+            url += `?startDate=${startDate}&endDate=${endDate}`;
+        }
+        return instance.get(url).then(res => res.data);
+    },
 
     // Staff Management (Admin)
     getAdminStaff: () => instance.get('/api/admin/staff').then(res => res.data),

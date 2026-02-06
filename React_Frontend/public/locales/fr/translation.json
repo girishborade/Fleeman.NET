@@ -41,7 +41,9 @@
         "supportTitle": "Support 24/7",
         "supportDesc": "Toujours là pour vous.",
         "techTitle": "Suivi en direct",
-        "techDesc": "Données GPS en temps réel."
+        "techDesc": "Données GPS en temps réel.",
+        "btnBookNow": "RÉSERVER",
+        "btnExploreVehicles": "EXPLORER VÉHICULES"
     },
     "nav": {
         "home": "Accueil",

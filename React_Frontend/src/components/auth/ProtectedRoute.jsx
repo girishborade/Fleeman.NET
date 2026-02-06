@@ -22,13 +22,9 @@ const ProtectedRoute = ({ allowedRoles = [] }) => {
             return <Navigate to="/login" state={{ from: location }} replace />;
         }
 
-        // Check role (if allowedRoles are provided)
-        // Adjust 'role' property based on your JWT structure (e.g., user.role or decoded.role)
-        // Assuming user object has role, or decoded token has it.
         const userRole = user.role || decoded.role || decoded["http://schemas.microsoft.com/ws/2008/06/identity/claims/role"];
 
         if (allowedRoles.length > 0 && !allowedRoles.some(role => userRole?.toLowerCase() === role.toLowerCase())) {
-            // Role not authorized, redirect to home or unauthorized page
             return <Navigate to="/" replace />;
         }
 

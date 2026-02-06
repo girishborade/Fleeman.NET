@@ -38,6 +38,13 @@ const Booking = () => {
     const [selectedState, setSelectedState] = useState('');
     const [selectedCity, setSelectedCity] = useState('');
     const [selectedHub, setSelectedHub] = useState('');
+    const [selectedReturnHub, setSelectedReturnHub] = useState('');
+
+    // Return Location States
+    const [returnCities, setReturnCities] = useState([]);
+    const [returnHubs, setReturnHubs] = useState([]);
+    const [selectedReturnState, setSelectedReturnState] = useState('');
+    const [selectedReturnCity, setSelectedReturnCity] = useState('');
     const [dates, setDates] = useState({ startDate: '', endDate: '' });
     const [selectedCar, setSelectedCar] = useState(null);
     const [selectedAddOnIds, setSelectedAddOnIds] = useState([]);
@@ -148,9 +155,10 @@ const Booking = () => {
         if (location.state) {
             // Case: Returning from Car Selection
             if (location.state.selectedCar) {
-                const { selectedCar: selCar, pickupHub, startDate, endDate } = location.state;
+                const { selectedCar: selCar, pickupHub, returnHub, startDate, endDate } = location.state;
                 setDates({ startDate, endDate });
                 setSelectedHub(pickupHub.hubId);
+                setSelectedReturnHub(returnHub ? returnHub.hubId : pickupHub.hubId);
                 // Pre-fill hubs to ensure dropdown shows something if list not loaded
                 setHubs([pickupHub]);
 
@@ -265,6 +273,47 @@ const Booking = () => {
         }
     };
 
+    const handleReturnStateChange = async (e) => {
+        const stateId = e.target.value;
+        const stateName = e.target.options[e.target.selectedIndex].text;
+        setSelectedReturnState({ id: stateId, name: stateName });
+        setSelectedReturnCity('');
+
+        try {
+            const data = await ApiService.getCitiesByState(stateId);
+            setReturnCities(data);
+        } catch (err) {
+            console.error(err);
+            setReturnCities([]);
+        }
+    };
+
+    const handleReturnCityChange = async (e) => {
+        const cityId = e.target.value;
+        const cityName = e.target.options[e.target.selectedIndex].text;
+        setSelectedReturnCity({ id: cityId, name: cityName });
+        setSelectedReturnHub(''); // Reset hub on city change
+
+        try {
+            const data = await ApiService.getHubs(selectedReturnState.name, cityName);
+            setReturnHubs(data);
+        } catch (err) {
+            console.error(err);
+            setReturnHubs([]);
+        }
+    };
+
+    const handleReturnHubChange = (e) => {
+        const hubId = e.target.value;
+        // Find full hub object if needed, but for now ID is enough for state
+        // UI uses ID. Navigation needs full object or at least ID.
+        // Let's store full object in state if useful, or just ID. 
+        // existing selectedReturnHub is likely just ID or object? 
+        // line 43: const [selectedReturnHub, setSelectedReturnHub] = useState(''); -> Intended as ID probably.
+
+        setSelectedReturnHub(hubId);
+    };
+
     const [airportCode, setAirportCode] = useState('');
     const [differentReturn, setDifferentReturn] = useState(false);
 
@@ -330,6 +379,16 @@ const Booking = () => {
             return;
         }
 
+        if (differentReturn) {
+            if (!selectedReturnState || (!selectedReturnCity && returnCities.length > 0) || (!selectedReturnHub && returnHubs.length > 0)) {
+                Swal.fire('Selection Missing', 'Please select return state, city, and hub', 'warning');
+                return;
+            }
+        }
+
+        // Find the full return hub object to pass
+        const returnHubObj = returnHubs.find(h => h.hubId == selectedReturnHub);
+
         navigate('/select-hub', {
             state: {
                 pickupDateTime: dates.startDate,
@@ -339,7 +398,13 @@ const Booking = () => {
                     stateName: selectedState.name,
                     cityName: selectedCity.name,
                     stateId: selectedState.id,
-                    cityId: selectedCity.id
+                    cityId: selectedCity.id,
+                    // Return Location Data
+                    returnStateName: differentReturn ? selectedReturnState.name : selectedState.name,
+                    returnCityName: differentReturn ? selectedReturnCity.name : selectedCity.name,
+                    returnStateId: differentReturn ? selectedReturnState.id : selectedState.id,
+                    returnCityId: differentReturn ? selectedReturnCity.id : selectedCity.id,
+                    returnHub: returnHubObj // Pass the actual hub object
                 },
                 searchType: 'city'
             }
@@ -426,7 +491,7 @@ const Booking = () => {
             carId: selectedCar.carId,
             customerId: customer.custId,
             pickupHubId: selectedHub,
-            returnHubId: selectedHub,
+            returnHubId: selectedReturnHub || selectedHub,
             startDate: dates.startDate,
             endDate: dates.endDate,
             addOnIds: addOnIdsToSubmit,
@@ -577,6 +642,44 @@ const Booking = () => {
                                         I may return the car to a different location
                                     </Label>
                                 </div>
+
+                                {/* Return Location Dropdowns (Conditional) */}
+                                {differentReturn && (
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4 pt-4 border-t border-dashed animate-in fade-in slide-in-from-top-2">
+                                        <div className="space-y-2">
+                                            <Label className="text-sm font-bold text-primary">Return State</Label>
+                                            <select
+                                                className="flex h-12 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+                                                onChange={handleReturnStateChange}
+                                            >
+                                                <option value="">--Select Return State--</option>
+                                                {states.map(s => <option key={s.stateId} value={s.stateId}>{s.stateName}</option>)}
+                                            </select>
+                                        </div>
+                                        <div className="space-y-2">
+                                            <Label className="text-sm font-bold text-primary">Return City</Label>
+                                            <select
+                                                className="flex h-12 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:opacity-50"
+                                                onChange={handleReturnCityChange}
+                                                disabled={!selectedReturnState}
+                                            >
+                                                <option value="">--Select Return City--</option>
+                                                {returnCities.map(c => <option key={c.cityId} value={c.cityId}>{c.cityName}</option>)}
+                                            </select>
+                                        </div>
+                                        <div className="space-y-2 md:col-span-2 animate-in fade-in slide-in-from-top-1">
+                                            <Label className="text-sm font-bold text-primary">Return Hub</Label>
+                                            <select
+                                                className="flex h-12 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:opacity-50"
+                                                onChange={handleReturnHubChange}
+                                                disabled={!selectedReturnCity || returnHubs.length === 0}
+                                            >
+                                                <option value="">--Select Return Hub--</option>
+                                                {returnHubs.map(h => <option key={h.hubId} value={h.hubId}>{h.hubName}</option>)}
+                                            </select>
+                                        </div>
+                                    </div>
+                                )}
 
                                 <Button className="w-full h-14 text-lg font-bold mt-6 shadow-lg shadow-primary/20" onClick={searchByCity}>
                                     Find Cars

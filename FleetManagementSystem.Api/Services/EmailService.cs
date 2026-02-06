@@ -1,5 +1,6 @@
 using MailKit.Net.Smtp;
 using MimeKit;
+using FleetManagementSystem.Api.DTOs;
 
 namespace FleetManagementSystem.Api.Services;
 
@@ -63,6 +64,65 @@ public class EmailService : IEmailService
         // Attach PDF
         builder.Attachments.Add(filename, pdfBytes, new MimeKit.ContentType("application", "pdf"));
         
+        message.Body = builder.ToMessageBody();
+
+        SendEmail(message, host, port, username, password);
+    }
+
+    public void SendBookingConfirmationEmail(string to, BookingResponse booking)
+    {
+         var host = _configuration["spring:mail:host"] ?? "smtp.gmail.com";
+        var port = int.Parse(_configuration["spring:mail:port"] ?? "587");
+        var username = _configuration["spring:mail:username"];
+        var password = _configuration["spring:mail:password"];
+
+        if (string.IsNullOrEmpty(username) || string.IsNullOrEmpty(password))
+        {
+            Console.WriteLine("Email not configured, skipping confirmation email");
+            return;
+        }
+
+        var message = new MimeMessage();
+        message.From.Add(new MailboxAddress("IndiaDrive", username));
+        message.To.Add(new MailboxAddress("", to));
+        message.Subject = $"Booking Confirmed - #{booking.BookingId}";
+
+        var builder = new BodyBuilder();
+        
+        string htmlBody = $@"
+        <div style='font-family: Arial, sans-serif; color: #333;'>
+            <h2 style='color: #2563eb;'>Booking Confirmed!</h2>
+            <p>Dear Customer,</p>
+            <p>Your booking with IndiaDrive has been successfully confirmed.</p>
+            
+            <table style='width: 100%; border-collapse: collapse; margin-top: 20px;'>
+                <tr style='background-color: #f3f4f6;'>
+                    <td style='padding: 10px; border: 1px solid #ddd;'><strong>Booking ID</strong></td>
+                    <td style='padding: 10px; border: 1px solid #ddd;'>#{booking.BookingId}</td>
+                </tr>
+                <tr>
+                    <td style='padding: 10px; border: 1px solid #ddd;'><strong>Vehicle</strong></td>
+                    <td style='padding: 10px; border: 1px solid #ddd;'>{booking.CarName} ({booking.NumberPlate})</td>
+                </tr>
+                 <tr style='background-color: #f3f4f6;'>
+                    <td style='padding: 10px; border: 1px solid #ddd;'><strong>Pickup</strong></td>
+                    <td style='padding: 10px; border: 1px solid #ddd;'>{booking.PickupHub}<br/>{booking.StartDate:f}</td>
+                </tr>
+                <tr>
+                    <td style='padding: 10px; border: 1px solid #ddd;'><strong>Return</strong></td>
+                    <td style='padding: 10px; border: 1px solid #ddd;'>{booking.ReturnHub}<br/>{booking.EndDate:f}</td>
+                </tr>
+                <tr style='background-color: #f3f4f6;'>
+                    <td style='padding: 10px; border: 1px solid #ddd;'><strong>Total Amount</strong></td>
+                    <td style='padding: 10px; border: 1px solid #ddd; color: #16a34a; font-weight: bold;'>Rs. {booking.TotalAmount}</td>
+                </tr>
+            </table>
+
+            <p style='margin-top: 20px;'>You can view your booking details on our website.</p>
+            <p>Safe Travels,<br/><strong>IndiaDrive Team</strong></p>
+        </div>";
+
+        builder.HtmlBody = htmlBody;
         message.Body = builder.ToMessageBody();
 
         SendEmail(message, host, port, username, password);

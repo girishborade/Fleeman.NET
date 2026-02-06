@@ -41,7 +41,9 @@
         "supportTitle": "24/7 Support",
         "supportDesc": "Always here for you.",
         "techTitle": "Live Tracking",
-        "techDesc": "Real-time GPS data."
+        "techDesc": "Real-time GPS data.",
+        "btnBookNow": "BOOK NOW",
+        "btnExploreVehicles": "EXPLORE VEHICLES"
     },
     "nav": {
         "home": "Home",

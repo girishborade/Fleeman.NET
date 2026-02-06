@@ -27,7 +27,7 @@ const CarSelection = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
 
-    const { pickupHub, pickupDateTime, returnDateTime } = location.state || {};
+    const { pickupHub, returnHub, pickupDateTime, returnDateTime } = location.state || {}; // returnHub might be undefined if not different return
 
     useEffect(() => {
         if (!location.state || !pickupHub) {
@@ -63,6 +63,7 @@ const CarSelection = () => {
             state: {
                 selectedCar: mockCar,
                 pickupHub,
+                returnHub: returnHub || pickupHub, // Ensure we have a return hub, default to pickup if not present
                 startDate: pickupDateTime,
                 endDate: returnDateTime
             }

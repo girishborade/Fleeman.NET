@@ -41,7 +41,9 @@
         "supportTitle": "२४/७ समर्थन",
         "supportDesc": "नेहमी तुमच्यासाठी इथे आहोत.",
         "techTitle": "लाइव्ह ट्रॅकिंग",
-        "techDesc": "रिअल-टाइम जीपीएस डेटा."
+        "techDesc": "रिअल-टाइम जीपीएस डेटा.",
+        "btnBookNow": "आत्ताच बुक करा",
+        "btnExploreVehicles": "वाहने एक्सप्लोर करा"
     },
     "nav": {
         "home": "होम",
