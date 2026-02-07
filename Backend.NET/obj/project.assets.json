@@ -4219,11 +4219,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\GIRI\\Desktop\\CDAC Project\\Fleet-Management-Dotnet\\FleetManagementSystem.Api\\FleetManagementSystem.Api.csproj",
+      "projectUniqueName": "C:\\Users\\GIRI\\Desktop\\CDAC Project\\Fleeman.NET-1\\Backend.NET\\FleetManagementSystem.Api.csproj",
       "projectName": "FleetManagementSystem.Api",
-      "projectPath": "C:\\Users\\GIRI\\Desktop\\CDAC Project\\Fleet-Management-Dotnet\\FleetManagementSystem.Api\\FleetManagementSystem.Api.csproj",
+      "projectPath": "C:\\Users\\GIRI\\Desktop\\CDAC Project\\Fleeman.NET-1\\Backend.NET\\FleetManagementSystem.Api.csproj",
       "packagesPath": "C:\\Users\\GIRI\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\GIRI\\Desktop\\CDAC Project\\Fleet-Management-Dotnet\\FleetManagementSystem.Api\\obj\\",
+      "outputPath": "C:\\Users\\GIRI\\Desktop\\CDAC Project\\Fleeman.NET-1\\Backend.NET\\obj\\",
       "projectStyle": "PackageReference",
       "fallbackFolders": [
         "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
